@@ -68,7 +68,8 @@ class Node:
 
 head_pos = Pos(0, 0)
 rope = [Node(head_pos)] * 10
-seen = {head_pos}
+seen_p1 = {head_pos}
+seen_p2 = {head_pos}
 
 for instr in real_data.splitlines():
     parts = instr.split(" ")
@@ -83,7 +84,9 @@ for instr in real_data.splitlines():
         for n in range(1, len(rope)):
             rope[n] = rope[n].catch_up(rope[n - 1])
 
-        # record the tail position
-        seen.add(rope[-1].pos)
+        # record the tail(s) position(s)
+        seen_p1.add(rope[1].pos)
+        seen_p2.add(rope[-1].pos)
 
-print(len(seen))
+print(len(seen_p1))
+print(len(seen_p2))

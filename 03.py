@@ -15,19 +15,22 @@ def to_prios(letters: str) -> list[int]:
     return [to_prio(letter) for letter in letters]
 
 
-cp = map(
-    lambda l: set(to_prios(l[len(l) // 2 :])) & set(to_prios(l[: len(l) // 2])),
-    lines,
+# Part 1
+p1 = sum(
+    map(
+        lambda l: (
+            set(to_prios(l[len(l) // 2 :])) & set(to_prios(l[: len(l) // 2]))
+        ).pop(),
+        lines,
+    )
 )
+print(p1)
 
-print(sum(map(lambda s: s.pop(), cp)))
-
-acc = 0
+# Part 2
+p2 = 0
 for x in range(0, len(lines), 3):
     l1 = set(to_prios(lines[x]))
     l2 = set(to_prios(lines[x + 1]))
     l3 = set(to_prios(lines[x + 2]))
-    badge = (l1 & l2 & l3).pop()
-    acc = acc + badge
-
-print(acc)
+    p2 += (l1 & l2 & l3).pop()
+print(p2)

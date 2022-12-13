@@ -110,8 +110,12 @@ def default_map() -> HeightMap:
 
 
 the_map = Map.from_lines((real_data * 1).splitlines())
-print("done mapping.")
 stats = [the_map.stats(*pos) for pos in the_map.iter()]
 
-print("visible trees:", len([1 for _ in stats if _.visible]))
-print("best scenic score:", max(_.scenic_score for _ in stats))
+# Part 1 - visible trees
+a1 = len([1 for _ in stats if _.visible])
+print(a1)
+
+# Part 2 - scenic score
+a2 = max(_.scenic_score for _ in stats)
+print(a2)

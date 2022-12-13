@@ -127,8 +127,8 @@ _monkeys = [replace(_, div_c=_div_c) for _ in _monkeys]
 
 # Part 1
 p1 = simulate_monkeys(deepcopy(_monkeys), 20)
-print("Part 1 Monkey Business:", p1[0] * p1[1])
+print(p1[0] * p1[1])
 
 # Part 2
 p2 = simulate_monkeys(deepcopy(_monkeys), 10000, dampen=False)
-print("Part 2 Monkey Business:", p2[0] * p2[1])
+print(p2[0] * p2[1])

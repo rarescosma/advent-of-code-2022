@@ -1,13 +1,12 @@
+import re
 from collections import deque
 from copy import deepcopy
 from dataclasses import dataclass, replace
+from functools import reduce
+from operator import add, mul
 from pathlib import Path
 from textwrap import dedent
 from typing import Callable, Pattern
-from operator import mul, add
-from functools import reduce
-import re
-
 
 INT_RE: Pattern = re.compile("[^0-9,]+")
 

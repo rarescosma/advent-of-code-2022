@@ -3,16 +3,16 @@ from pathlib import Path
 lines = Path("inputs/03.txt").read_text().splitlines()
 
 
-def to_prio(l):
+def to_prio(letter: str) -> int:
     big = ord("A")
     smol = ord("a")
-    if ord(l) >= smol:
-        return ord(l) - smol + 1
-    return ord(l) - big + 27
+    if ord(letter) >= smol:
+        return ord(letter) - smol + 1
+    return ord(letter) - big + 27
 
 
-def to_prios(ls):
-    return [to_prio(l) for l in ls]
+def to_prios(letters: str) -> list[int]:
+    return [to_prio(letter) for letter in letters]
 
 
 cp = map(

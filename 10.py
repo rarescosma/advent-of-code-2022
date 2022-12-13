@@ -58,11 +58,7 @@ def interesting_cycle(x: int) -> bool:
 
 
 def is_lit(state: State) -> bool:
-    return (
-        state.pos == state.x
-        or state.pos == state.x - 1
-        or state.pos == state.x + 1
-    )
+    return state.pos in (state.x, state.x - 1, state.x + 1)
 
 
 cpu = CPU(instructions=deque(map(Instr.from_str, test_data.splitlines())))

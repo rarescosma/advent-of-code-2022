@@ -1,3 +1,4 @@
+from collections import defaultdict
 from dataclasses import dataclass, replace
 from pathlib import Path, PurePath
 from typing import Generator
@@ -22,13 +23,7 @@ class State:
         if child == "/":
             return replace(self, cur_dir=PurePath("/"))
 
-        new_dir = self.cur_dir / child
-        dir_name = new_dir.as_posix()
-
-        if dir_name not in self.dirs:
-            new_dirs = {**self.dirs, dir_name: 0}
-            return replace(self, cur_dir=new_dir, dirs=new_dirs)
-        return self
+        return replace(self, cur_dir=(self.cur_dir / child))
 
     def update_sizes(self, ls_output: list[str]) -> "State":
         new_dirs = self.dirs
@@ -41,11 +36,9 @@ class State:
 
     @staticmethod
     def get_ascendants(path: PurePath) -> Generator[str, None, None]:
-        cur_path = path
-        while cur_path.parent != cur_path:
-            yield cur_path.as_posix()
-            cur_path = cur_path.parent
-        yield "/"
+        yield path.as_posix()
+        for par in path.parents:
+            yield par.as_posix()
 
 
 def next_command(lines: list[str]) -> Generator[Command, None, None]:
@@ -79,22 +72,22 @@ def update_state(_state: State, _cmd: Command) -> State:
     return _state
 
 
-state = State(PurePath("/"), {"/": 0})
+state = State(PurePath("/"), defaultdict(int))
 for cmd in next_command(Path("inputs/07.txt").read_text().splitlines()):
     state = update_state(state, cmd)
 
-answer = 0
+# Part 1
+a1 = 0
 for _, v in state.dirs.items():
     if v <= 100000:
-        answer += v
+        a1 += v
+print(a1)
 
-print("Part 1 answer:", answer)
-
+# Part 2
 tot_size = 70000000 - state.dirs["/"]
 needed = 30000000
-least_dir = 100000000
+a2 = 1e12
 for _, v in state.dirs.items():
-    if v < least_dir and (tot_size + v) >= needed:
-        least_dir = v
-
-print("\nPart 2 answer:", least_dir)
+    if v < a2 and (tot_size + v) >= needed:
+        a2 = v
+print(a2)

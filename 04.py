@@ -20,26 +20,22 @@ class Range:
     def contains(self, other: "Range") -> bool:
         return other.start >= self.start and other.end <= self.end
 
-    def intersect(self, other: "Range") -> "Range":
-        return Range(
-            start=max(self.start, other.start),
-            end=min(self.end, other.end),
-        )
-
-    def overlaps(self, other: "Range") -> bool:
-        return self.intersect(other).is_valid()
+    def intersects(self, other: "Range") -> bool:
+        # self.start            self.end
+        #           other.start           other.end
+        # => not completely to the left or right of other
+        return not (self.end < other.start or other.end < self.start)
 
 
-acc = 0
-ol = 0
-
+p1 = 0
+p2 = 0
 for line in lines:
     ends = line.split(",")
     r1, r2 = Range.from_str(ends[0]), Range.from_str(ends[1])
     if r1.contains(r2) or r2.contains(r1):
-        acc += 1
-    if r1.overlaps(r2):
-        ol += 1
+        p1 += 1
+    if r1.intersects(r2):
+        p2 += 1
 
-print(acc)
-print(ol)
+print(p1)
+print(p2)

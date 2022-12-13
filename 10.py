@@ -63,16 +63,21 @@ def is_lit(state: State) -> bool:
 
 cpu = CPU(instructions=deque(map(Instr.from_str, test_data.splitlines())))
 sig_sum = 0
+display = ""
 
-for cycle in range(1, 243):
+for cycle in range(1, 241):
     if interesting_cycle(cycle):
         sig_sum += cycle * _state.x
 
     if _state.pos == 0:
-        print()
+        display += "\n"
 
-    print("#" if is_lit(_state) else " ", end="")
+    display += "#" if is_lit(_state) else " "
 
     cpu.tick(_state)
 
-print("\nsignal sum:", sig_sum)
+# Part 1
+print(sig_sum)
+
+# Part 2
+print(display)

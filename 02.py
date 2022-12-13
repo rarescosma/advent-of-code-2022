@@ -35,5 +35,11 @@ def lose(o: int) -> int:
 
 
 lines = Path("inputs/02.txt").read_text().splitlines()
-rounds = map(lambda x: play(rps[x[0]], rps[x[2]]), lines)
-print(sum(rounds))
+
+# Part 1
+p1 = sum(map(lambda x: play(rps[x[0]], rps[x[2]]), lines))
+print(p1)
+
+# Part 2
+p2 = sum(map(lambda x: strat(rps[x[0]], rps[x[2]]), lines))
+print(p2)

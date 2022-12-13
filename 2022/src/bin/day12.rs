@@ -90,11 +90,11 @@ fn main() {
     let start_cost = State { pos: end_pos }.dijsktra(&mut ctx);
 
     // Part 1
-    println!("part 1 steps: {:?}", start_cost);
+    println!("{}", start_cost.unwrap());
 
     // Part 2
-    println!("part 2 steps: {:?}", ctx.min_cost);
+    println!("{}", ctx.min_cost);
 
     let time = now.elapsed().as_micros();
-    println!("Time: {}us", time);
+    eprintln!("Time: {}us", time);
 }

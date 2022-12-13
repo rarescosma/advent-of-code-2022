@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 from textwrap import dedent
-from typing import NamedTuple
+from typing import NamedTuple, Union
 
 test_data = dedent(
     """
@@ -37,8 +37,10 @@ class Pos(NamedTuple):
             return 0
         return 1 if b > a else -1
 
-    def __add__(self, other: "Pos") -> "Pos":
-        return Pos(self.x + other.x, self.y + other.y)
+    def __add__(self, other: Union[tuple, "Pos"]) -> "Pos":
+        if isinstance(other, Pos):
+            return Pos(self.x + other.x, self.y + other.y)
+        return NotImplemented
 
 
 DELTAS: dict[str, Pos] = {

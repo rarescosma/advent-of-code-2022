@@ -1,8 +1,8 @@
+from functools import cmp_to_key, reduce
 from operator import mul
+from pathlib import Path
 from textwrap import dedent
 from typing import Any
-from pathlib import Path
-from functools import cmp_to_key, reduce
 
 real_data = Path("inputs/13.txt").read_text()
 

@@ -10,23 +10,23 @@ class Range:
     end: int
 
     @classmethod
-    def from_str(cls, x):
+    def from_str(cls, x: str) -> "Range":
         range_ends = x.split("-")
         return cls(start=int(range_ends[0]), end=int(range_ends[1]))
 
-    def is_valid(self):
+    def is_valid(self) -> bool:
         return self.end >= self.start
 
-    def contains(self, other):
+    def contains(self, other: "Range") -> bool:
         return other.start >= self.start and other.end <= self.end
 
-    def intersect(self, other):
+    def intersect(self, other: "Range") -> "Range":
         return Range(
             start=max(self.start, other.start),
             end=min(self.end, other.end),
         )
 
-    def overlaps(self, other):
+    def overlaps(self, other: "Range") -> bool:
         return self.intersect(other).is_valid()
 
 

@@ -10,7 +10,7 @@ rps = {
 }
 
 
-def play(other, me):
+def play(other: int, me: int) -> int:
     if other == me:
         return 3 + me
     if win(other) == me:
@@ -18,25 +18,22 @@ def play(other, me):
     return me
 
 
-def strat(o, s):
+def strat(o: int, s: int) -> int:
     if s == 2:
         return 3 + o
     if s == 1:
         return lose(o)
-    if s == 3:
-        return 6 + win(o)
+    return 6 + win(o)
 
 
-def win(o):
+def win(o: int) -> int:
     return (o % 3) + 1
 
 
-def lose(o):
+def lose(o: int) -> int:
     return (o - 1) or 3
 
 
-with Path("inputs/02.txt") as f:
-    lines = f.read_text().splitlines()
-
-    rounds = map(lambda x: play(rps[x[0]], rps[x[2]]), lines)
-    print(sum(rounds))
+lines = Path("inputs/02.txt").read_text().splitlines()
+rounds = map(lambda x: play(rps[x[0]], rps[x[2]]), lines)
+print(sum(rounds))

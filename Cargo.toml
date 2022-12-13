@@ -1,0 +1,11 @@
+[workspace]
+members = [
+    "crates/aoc_2dmap",
+    "crates/aoc_prelude",
+    "2022",
+]
+
+[profile.release]
+lto = "fat"
+incremental = false
+debug = 0

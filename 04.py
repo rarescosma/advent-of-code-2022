@@ -21,8 +21,8 @@ class Range:
         return other.start >= self.start and other.end <= self.end
 
     def intersects(self, other: "Range") -> bool:
-        # self.start            self.end
-        #           other.start           other.end
+        #         [oooooooooooooooo]
+        # [sssssssssss]        [sssssssssss]
         # => not completely to the left or right of other
         return not (self.end < other.start or other.end < self.start)
 
@@ -30,8 +30,7 @@ class Range:
 p1 = 0
 p2 = 0
 for line in lines:
-    ends = line.split(",")
-    r1, r2 = Range.from_str(ends[0]), Range.from_str(ends[1])
+    r1, r2 = map(Range.from_str, line.split(","))
     if r1.contains(r2) or r2.contains(r1):
         p1 += 1
     if r1.intersects(r2):

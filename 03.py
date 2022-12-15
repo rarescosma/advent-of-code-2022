@@ -11,26 +11,22 @@ def to_prio(letter: str) -> int:
     return ord(letter) - big + 27
 
 
-def to_prios(letters: str) -> list[int]:
-    return [to_prio(letter) for letter in letters]
+def to_prios(letters: str) -> set[int]:
+    return {to_prio(letter) for letter in letters}
 
 
 # Part 1
 p1 = sum(
-    map(
-        lambda l: (
-            set(to_prios(l[len(l) // 2 :])) & set(to_prios(l[: len(l) // 2]))
-        ).pop(),
-        lines,
-    )
+    (to_prios(line[len(line) // 2 :]) & to_prios(line[: len(line) // 2])).pop()
+    for line in lines
 )
 print(p1)
 
 # Part 2
 p2 = 0
 for x in range(0, len(lines), 3):
-    l1 = set(to_prios(lines[x]))
-    l2 = set(to_prios(lines[x + 1]))
-    l3 = set(to_prios(lines[x + 2]))
+    l1 = to_prios(lines[x])
+    l2 = to_prios(lines[x + 1])
+    l3 = to_prios(lines[x + 2])
     p2 += (l1 & l2 & l3).pop()
 print(p2)

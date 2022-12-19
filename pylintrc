@@ -8,4 +8,5 @@ disable=
     missing-class-docstring,
     missing-function-docstring,
     unspecified-encoding,
-    eval-used
+    eval-used,
+    too-many-locals

@@ -40,6 +40,7 @@ Item = Union[Monkey, int]
 
 OPS = {"*": mul, "/": floordiv, "+": add, "-": sub}
 INV = {"*": "/", "/": "*", "+": "-", "-": "+"}
+HUMN = "humn"
 
 items: dict[str, Item] = {}
 for line in real_data:
@@ -59,7 +60,7 @@ def solve(item_id: str, _items: dict[str, Item]) -> int:
 
 
 def solve_equation(_items: dict[str, Item]) -> int:
-    del _items["humn"]
+    del _items[HUMN]
     _solve = partial(solve, _items=_items)
 
     # solve whatever we can, record "humn" dependencies
@@ -75,7 +76,7 @@ def solve_equation(_items: dict[str, Item]) -> int:
     # check for invariants:
     # 1) "humn" never appears as a RIGHT term
     # 2) root's RIGHT term doesn't depend on "humn" (so it solved as int)
-    assert not any(isinstance(_, Monkey) and _.r_term == "humn" for _ in _items)
+    assert not any(isinstance(_, Monkey) and _.r_term == HUMN for _ in _items)
     assert (
         isinstance(_items["root"], Monkey)
         and _items["root"].r_term not in humn_dep
@@ -83,7 +84,7 @@ def solve_equation(_items: dict[str, Item]) -> int:
     right = cast(int, _items[_items["root"].r_term])
     cur = _items[_items["root"].l_term]
 
-    while isinstance(cur, Monkey) and cur.l_term != "humn":
+    while isinstance(cur, Monkey) and cur.l_term != HUMN:
         # move cur.l_term to the other side
         if cur.r_term in humn_dep:
             # l_term * r_term = right => r_term = right / l_term

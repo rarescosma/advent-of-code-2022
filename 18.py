@@ -80,9 +80,11 @@ def dfs_fill(droplet: set[Cube]) -> set[Cube]:
         k = q.popleft()
 
         for neigh in k.neighs():
-            if not neigh.is_within(bb_bot, bb_top):
-                continue
-            if neigh in air or neigh in droplet:
+            if (
+                not neigh.is_within(bb_bot, bb_top)
+                or neigh in air
+                or neigh in droplet
+            ):
                 continue
             air.add(neigh)
             q.append(neigh)

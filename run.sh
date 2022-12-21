@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-DAY=20
+DAY=21
 
 for x in $(seq -w 1 $DAY); do
     echo ">>> Day $x <<<"

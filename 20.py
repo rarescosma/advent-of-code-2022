@@ -28,9 +28,13 @@ Ptr = Optional[El]
 
 
 def intercede(_el: El, bef: Ptr, aft: Ptr) -> None:
-    # inter: dest <-> n_dest ---> dest <-> el <-> n_dest
     if bef is None or aft is None:
         return
+    # stich: left <-> el <-> right ---> left <-> right
+    cast(El, _el.left).right = _el.right
+    cast(El, _el.right).left = _el.left
+
+    # inter: dest <-> n_dest ---> dest <-> el <-> n_dest
     bef.right = _el
     _el.right = aft
     aft.left = _el
@@ -39,28 +43,23 @@ def intercede(_el: El, bef: Ptr, aft: Ptr) -> None:
 
 def mix_it(the_data: list[str], coef: int = 1, times: int = 1) -> El:
     dll = [El(int(_) * coef) for _ in the_data]
+    zero = dll[the_data.index("0")]
+
+    # link the doubly linked list
     for i, el in enumerate(dll):
         el.left = dll[(i - 1) % len(dll)]
         el.right = dll[(i + 1) % len(dll)]
-    zero = None
+
     modulus = len(dll) - 1
     for _ in range(times):
         for el in dll:
-            if el.k == 0:
-                zero = el
-                continue
-
-            # stich: left <-> el <-> right ---> left <-> right
-            cast(El, el.left).right = el.right
-            cast(El, el.right).left = el.left
-
             if el.k > 0:
                 dest = el
                 for _ in range(el.k % modulus):
                     dest = cast(El, dest.right)
                 n_dest = dest.right
                 intercede(el, dest, n_dest)
-            else:
+            elif el.k < 0:
                 dest = el
                 for _ in range(-el.k % modulus):
                     dest = cast(El, dest.left)

@@ -16,3 +16,8 @@ regex = { version = "1.5", default-features = false, features = ["std", "unicode
 [[bin]]
 name = "day12"
 path = "src/bin/day12.rs"
+
+[[bin]]
+name = "day24"
+path = "src/bin/day24.rs"
+

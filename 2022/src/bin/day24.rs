@@ -46,7 +46,7 @@ struct Ctx {
     start_pos: Pos,
     end_pos: Pos,
     end_time: usize,
-    map_stages: ArrayVec<Map<Tile>, 300>,
+    map_stages: ArrayVec<Map<Tile>, 1024>,
 }
 
 struct Move(Pos);
@@ -79,7 +79,8 @@ impl GameState<Ctx> for State {
         let mut steps = ArrayVec::new();
 
         let current_pos = self.pos;
-        let next_map = &ctx.map_stages[(self.time + 1) % 300];
+        let cycle_len = &ctx.map_stages.len();
+        let next_map = &ctx.map_stages[(self.time + 1) % cycle_len];
 
         if current_pos == ctx.start_pos {
             steps.push(Move(current_pos));
@@ -91,11 +92,7 @@ impl GameState<Ctx> for State {
             .chain(std::iter::once(current_pos))
         {
             match next_map.get(n_pos) {
-                None => {
-                    if n_pos == ctx.end_pos {
-                        steps.push(Move(n_pos))
-                    }
-                }
+                None if n_pos == ctx.end_pos => steps.push(Move(n_pos)),
                 Some(Tile::Empty) => steps.push(Move(n_pos)),
                 _ => {}
             }
@@ -148,6 +145,35 @@ fn step(map: &Map<Tile>) -> Map<Tile> {
     new_map
 }
 
+struct SolveRes {
+    num_moves: usize,
+    end_time: usize,
+}
+
+fn solve(
+    start_pos: Pos,
+    end_pos: Pos,
+    map_stages: &ArrayVec<Map<Tile>, 1024>,
+    start_time: usize,
+) -> SolveRes {
+    let mut ctx = Ctx {
+        start_pos,
+        end_pos,
+        end_time: 0,
+        map_stages: map_stages.clone(),
+    };
+    let state = State {
+        pos: start_pos,
+        time: start_time,
+    };
+
+    let num_moves = state.dijsktra(&mut ctx).unwrap();
+    SolveRes {
+        num_moves,
+        end_time: ctx.end_time,
+    }
+}
+
 fn main() {
     let input = read_input();
 
@@ -162,7 +188,7 @@ fn main() {
     );
 
     let mut seen: HashSet<Map<Tile>> = HashSet::new();
-    let mut map_stages = ArrayVec::<Map<Tile>, 300>::new();
+    let mut map_stages = ArrayVec::<Map<Tile>, 1024>::new();
     map_stages.push(map.clone());
     seen.insert(map.clone());
     loop {
@@ -179,44 +205,11 @@ fn main() {
     let end_pos: Pos = Pos::from((map_size.0 - 1, map_size.1));
 
     // Part 1 - there
-    let mut ctx1 = Ctx {
-        start_pos,
-        end_pos,
-        end_time: 0,
-        map_stages: map_stages.clone(),
-    };
-    let st1 = State {
-        pos: start_pos,
-        time: 0,
-    };
-    let mut ans = st1.dijsktra(&mut ctx1).unwrap();
-    println!("{}", ans);
+    let ans = solve(start_pos, end_pos, &map_stages, 0);
+    println!("{}", ans.num_moves);
 
     // Part 2 - and back again
-    let mut ctx2 = Ctx {
-        start_pos: end_pos,
-        end_pos: start_pos,
-        end_time: 0,
-        map_stages: map_stages.clone(),
-    };
-
-    let st2 = State {
-        pos: end_pos,
-        time: ctx1.end_time,
-    };
-    ans += st2.dijsktra(&mut ctx2).unwrap();
-
-    let mut ctx3 = Ctx {
-        start_pos,
-        end_pos,
-        end_time: 0,
-        map_stages,
-    };
-
-    let st3 = State {
-        pos: start_pos,
-        time: ctx2.end_time,
-    };
-    ans += st3.dijsktra(&mut ctx3).unwrap();
-    println!("{}", ans);
+    let back = solve(end_pos, start_pos, &map_stages, ans.end_time);
+    let again = solve(start_pos, end_pos, &map_stages, back.end_time);
+    println!("{}", ans.num_moves + back.num_moves + again.num_moves);
 }

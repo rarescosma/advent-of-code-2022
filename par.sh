@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-DAY=21
+DAY=24
 INTERPRETER="${1:-python}"
 
 locat() {

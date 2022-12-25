@@ -2,6 +2,7 @@ use aoc_2dmap::prelude::*;
 use aoc_dijsktra::{Dijsktra, GameState, Transform};
 use aoc_prelude::*;
 use std::fmt::{Display, Formatter};
+use std::iter::once;
 
 #[derive(Clone, Debug, PartialOrd, Ord, Eq, PartialEq, Hash)]
 enum Tile {
@@ -31,7 +32,7 @@ impl From<u8> for Tile {
         match c {
             b'#' => Self::Wall,
             b'.' => Self::Empty,
-            x => Self::Blizz(ArrayVec::from_iter(std::iter::once(x))),
+            x => Self::Blizz(ArrayVec::from_iter(once(x))),
         }
     }
 }
@@ -86,11 +87,7 @@ impl GameState<Ctx> for State {
             steps.push(Move(current_pos));
         }
 
-        for n_pos in self
-            .pos
-            .neighbors_simple()
-            .chain(std::iter::once(current_pos))
-        {
+        for n_pos in self.pos.neighbors_simple().chain(once(current_pos)) {
             match next_map.get(n_pos) {
                 None if n_pos == ctx.end_pos => steps.push(Move(n_pos)),
                 Some(Tile::Empty) => steps.push(Move(n_pos)),
@@ -135,7 +132,7 @@ fn step(map: &Map<Tile>) -> Map<Tile> {
                         Tile::Blizz(nbs) => {
                             nbs.push(b);
                         }
-                        _ => new_map.set(np, Tile::Blizz(ArrayVec::from_iter(std::iter::once(b)))),
+                        _ => new_map.set(np, Tile::Blizz(ArrayVec::from_iter(once(b)))),
                     }
                 }
             }

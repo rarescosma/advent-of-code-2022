@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-DAY=21
+DAY=24
 INTERPRETER="${1:-python}"
 
 for x in $(seq -w 1 $DAY); do

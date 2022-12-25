@@ -1,7 +1,6 @@
 use aoc_2dmap::prelude::*;
 use aoc_dijsktra::{Dijsktra, GameState, Transform};
 use aoc_prelude::*;
-use std::fmt::{Display, Formatter};
 use std::iter::once;
 
 #[derive(Clone, Debug, PartialOrd, Ord, Eq, PartialEq, Hash)]
@@ -9,22 +8,6 @@ enum Tile {
     Wall,
     Empty,
     Blizz(ArrayVec<u8, 4>),
-}
-
-impl Display for Tile {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Tile::Wall => write!(f, "#"),
-            Tile::Empty => write!(f, "."),
-            Tile::Blizz(bs) => {
-                if bs.len() > 1 {
-                    write!(f, "{}", bs.len())
-                } else {
-                    write!(f, "{}", std::str::from_utf8(&[bs[0]]).unwrap())
-                }
-            }
-        }
-    }
 }
 
 impl From<u8> for Tile {

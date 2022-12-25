@@ -1,9 +1,10 @@
 use aoc_2dmap::prelude::*;
 use aoc_dijsktra::{Dijsktra, GameState, Transform};
 use aoc_prelude::*;
+use std::hash::{Hash, Hasher};
 use std::iter::once;
 
-#[derive(Clone, Debug, PartialOrd, Ord, Eq, PartialEq, Hash)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Debug)]
 enum Tile {
     Empty,
     Blizz(ArrayVec<u8, 4>),
@@ -18,17 +19,17 @@ impl From<u8> for Tile {
     }
 }
 
-#[derive(PartialOrd, Ord, PartialEq, Eq, Hash, Clone)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Hash)]
 struct State {
     pos: Pos,
     time: usize,
 }
 
-struct Ctx {
+struct Ctx<'a> {
     start_pos: Pos,
     end_pos: Pos,
     end_time: usize,
-    map_stages: ArrayVec<Map<Tile>, 1024>,
+    map_stages: &'a ArrayVec<Map<Tile>, 1024>,
 }
 
 struct Move(Pos);
@@ -46,7 +47,7 @@ impl Transform<State> for Move {
     }
 }
 
-impl GameState<Ctx> for State {
+impl GameState<Ctx<'_>> for State {
     type Steps = ArrayVec<Move, 5>;
 
     fn accept(&self, _cost: usize, ctx: &mut Ctx) -> bool {
@@ -138,7 +139,7 @@ fn solve(
         start_pos,
         end_pos,
         end_time: 0,
-        map_stages: map_stages.clone(),
+        map_stages,
     };
     let state = State {
         pos: start_pos,
@@ -158,24 +159,24 @@ fn main() {
     let i_len = input.len();
     let map_size = (input[0].len() - 2, i_len - 2);
 
-    let mut map = Map::<Tile>::new(
+    let map = Map::<Tile>::new(
         map_size,
         input[1..i_len - 1]
             .iter()
             .flat_map(|t| t.bytes().dropping(1).dropping_back(1).map(Tile::from)),
     );
 
-    let mut seen: HashSet<Map<Tile>> = HashSet::new();
+    let mut seen: HashSet<u64> = HashSet::new();
     let mut map_stages = ArrayVec::<Map<Tile>, 1024>::new();
-    map_stages.push(map.clone());
-    seen.insert(map.clone());
+    seen.insert(calculate_hash(&map));
+    map_stages.push(map);
     loop {
-        let new_map = step(&map);
-        if seen.contains(&new_map) {
+        let new_map = step(map_stages.last().unwrap());
+        let new_hash = calculate_hash(&new_map);
+        if seen.contains(&new_hash) {
             break;
         }
-        map = new_map.clone();
-        seen.insert(new_map.clone());
+        seen.insert(new_hash);
         map_stages.push(new_map);
     }
 
@@ -191,3 +192,10 @@ fn main() {
     let again = solve(start_pos, end_pos, &map_stages, back.end_time);
     println!("{}", ans.num_moves + back.num_moves + again.num_moves);
 }
+
+fn calculate_hash<T: Hash>(t: &T) -> u64 {
+    let mut s = ahash::AHasher::default();
+    t.hash(&mut s);
+    s.finish()
+}
+

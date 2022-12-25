@@ -5,6 +5,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+ahash = "0.8.2"
 aoc_2dmap = { path = "../crates/aoc_2dmap" }
 aoc_dijsktra = { path = "../crates/aoc_dijsktra" }
 aoc_prelude = { path = "../crates/aoc_prelude" }

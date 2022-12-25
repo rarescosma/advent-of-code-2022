@@ -81,10 +81,6 @@ impl GameState<Ctx<'_>> for State {
     }
 }
 
-fn read_input() -> Vec<&'static str> {
-    include_str!("../../../inputs/24.txt").lines().collect()
-}
-
 fn step(map: &Map<Tile>) -> Map<Tile> {
     let mut new_map = Map::fill(map.size, Tile::Empty);
     for pos in map.iter() {
@@ -199,3 +195,6 @@ fn calculate_hash<T: Hash>(t: &T) -> u64 {
     s.finish()
 }
 
+fn read_input() -> Vec<&'static str> {
+    include_str!("../../../inputs/24.txt").lines().collect()
+}

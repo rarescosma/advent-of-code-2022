@@ -5,7 +5,6 @@ use std::iter::once;
 
 #[derive(Clone, Debug, PartialOrd, Ord, Eq, PartialEq, Hash)]
 enum Tile {
-    Wall,
     Empty,
     Blizz(ArrayVec<u8, 4>),
 }
@@ -13,7 +12,6 @@ enum Tile {
 impl From<u8> for Tile {
     fn from(c: u8) -> Self {
         match c {
-            b'#' => Self::Wall,
             b'.' => Self::Empty,
             x => Self::Blizz(ArrayVec::from_iter(once(x))),
         }
@@ -119,7 +117,7 @@ fn step(map: &Map<Tile>) -> Map<Tile> {
                     }
                 }
             }
-            Tile::Wall | Tile::Empty => {}
+            Tile::Empty => {}
         }
     }
     new_map

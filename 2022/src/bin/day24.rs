@@ -81,7 +81,7 @@ impl GameState<Ctx<'_>> for State {
     }
 }
 
-fn step(map: &Map<Tile>) -> Map<Tile> {
+fn advance(map: &Map<Tile>) -> Map<Tile> {
     let mut new_map = Map::fill(map.size, Tile::Empty);
     for pos in map.iter() {
         match map.get_unchecked(pos) {
@@ -167,7 +167,7 @@ fn main() {
     seen.insert(calculate_hash(&map));
     map_stages.push(map);
     loop {
-        let new_map = step(map_stages.last().unwrap());
+        let new_map = advance(map_stages.last().unwrap());
         let new_hash = calculate_hash(&new_map);
         if seen.contains(&new_hash) {
             break;

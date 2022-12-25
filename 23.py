@@ -87,21 +87,15 @@ def simulate(the_map: set[Pos], rounds: int, part: int = 0) -> int:
         from_pos.clear()
         to_pos.clear()
         for elf in the_map:
-            n0, n1, n2, n3 = [
-                check_pos(_) for _ in get_neighbors(elf, round_mod)[:4]
-            ]
-            if n0 and n1 and n2 and n3:
+            checks = [check_pos(_) for _ in get_neighbors(elf, round_mod)[:4]]
+            if all(checks):
                 continue
             np = None
             _dirs = the_dirs[round_mod]
-            if n0:
-                np = elf + offsets[_dirs[0]]
-            elif n1:
-                np = elf + offsets[_dirs[1]]
-            elif n2:
-                np = elf + offsets[_dirs[2]]
-            elif n3:
-                np = elf + offsets[_dirs[3]]
+            for i, check in enumerate(checks):
+                if check:
+                    np = elf + offsets[_dirs[i]]
+                    break
             if np is None:
                 continue
             new_pos_cnt[np] += 1

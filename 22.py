@@ -6,7 +6,7 @@ from dataclasses import dataclass, replace
 from functools import partial
 from pathlib import Path
 from textwrap import dedent
-from typing import Callable, Generator, NamedTuple, Optional, Union
+from typing import Any, Callable, Generator, NamedTuple, Optional, Union
 
 test_data = dedent(
     """
@@ -140,12 +140,14 @@ class Point:
     def nameless(self) -> "Point":
         return replace(self, pid=-1)
 
-    def dim(self, n: int) -> float:
-        if n == 0:
+    def __getitem__(self, key: Any) -> float:
+        if not isinstance(key, int):
+            raise TypeError
+        if key == 0:
             return self.x
-        elif n == 1:
+        elif key == 1:
             return self.y
-        elif n == 2:
+        elif key == 2:
             return self.z
         raise ValueError
 
@@ -155,9 +157,9 @@ class Point:
         return replace(self, **{"xyz"[dim]: coords[dim]})
 
     def is_between(self, dim: int, p0: "Point", p1: "Point") -> bool:
-        p_min = min(p0.dim(dim), p1.dim(dim))
-        p_max = max(p0.dim(dim), p1.dim(dim))
-        return p_min < self.dim(dim) < p_max
+        p_min = min(p0[dim], p1[dim])
+        p_max = max(p0[dim], p1[dim])
+        return p_min < self[dim] < p_max
 
     def forms_edge_with(self, p: "Point") -> bool:
         return (self.x == p.x and abs(self.y - p.y) == face_size) or (
@@ -168,9 +170,7 @@ class Point:
         self, dim: int, orig: "Point", clockwise: bool = True
     ) -> "Point":
         # first translate so that we go around "origin"
-        coords = [
-            self.dim(_) - (orig.dim(_) if _ != dim else 0) for _ in range(3)
-        ]
+        coords = [self[_] - (orig[_] if _ != dim else 0) for _ in range(3)]
 
         l_dim = (dim - 1) % 3
         h_dim = (dim + 1) % 3
@@ -180,9 +180,7 @@ class Point:
             coords[l_dim], coords[h_dim] = -coords[h_dim], coords[l_dim]
 
         # translate it back
-        coords = [
-            coords[_] + (orig.dim(_) if _ != dim else 0) for _ in range(3)
-        ]
+        coords = [coords[_] + (orig[_] if _ != dim else 0) for _ in range(3)]
         x, y, z = coords[:3]
         return Point(x, y, z, pid=self.pid)
 
@@ -210,7 +208,7 @@ class Fold:
 
     def fold(self, named: set[Point], clockwise: bool = True) -> set[Point]:
         p0, p1 = get_named(named, self.pid0), get_named(named, self.pid1)
-        dim = next(_ for _ in range(3) if p0.dim(_) != p1.dim(_))
+        dim = next(_ for _ in range(3) if p0[_] != p1[_])
 
         to_rot = {
             _.rotate(dim, p1, clockwise)
@@ -330,7 +328,7 @@ class Portal:
 
         dim = self.src_axis
         conv = Point.planar_converse(dim)
-        if s0.dim(dim) == s1.dim(dim) and new_pt.dim(dim) != old_pt.dim(dim):
+        if s0[dim] == s1[dim] and new_pt[dim] != old_pt[dim]:
             return (
                 old_pt.is_between(conv, s0, s1)
                 and s0.is_between(dim, old_pt, new_pt)
@@ -344,7 +342,7 @@ class Portal:
         s0, _ = self.src
         d0, _ = self.dest
         conv = Point.planar_converse(self.src_axis)
-        a_diff = old_pt.dim(conv) - s0.dim(conv)
+        a_diff = old_pt[conv] - s0[conv]
 
         new_pt = (d0 + self.delta).change_dim(
             Point.planar_converse(self.dest_axis),

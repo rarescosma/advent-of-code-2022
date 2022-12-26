@@ -421,15 +421,16 @@ def find_cube(named: set[Point], folds: list[Fold]) -> Adjacency:
         for fold, direction in zip(folds, directions):
             _named = fold.fold(_named, direction)
             num_points = len({_.nameless() for _ in _named})
-            if num_points == 8:
-                _collate = defaultdict(set)
-                adj: Adjacency = defaultdict(set)
-                for _ in _named:
-                    _collate[_.nameless()].add(_.pid)
-                for vertices in _collate.values():
-                    for vertex in vertices:
-                        adj[vertex] |= vertices - {vertex}
-                return adj
+            if num_points != 8:  # not a cube, keep foldin'
+                continue
+            collapsed = defaultdict(set)
+            adj: Adjacency = defaultdict(set)
+            for point in _named:
+                collapsed[point.nameless()].add(point.pid)
+            for point_ids in collapsed.values():
+                for point_id in point_ids:
+                    adj[point_id] |= point_ids - {point_id}
+            return adj
     return {}
 
 

@@ -50,7 +50,7 @@ impl Transform<State> for Move {
 }
 
 impl GameState<Ctx<'_>> for State {
-    type Steps = ArrayVec<Move, 5>;
+    type Steps = ArrayVec<Move, 6>;
 
     fn accept(&self, _cost: usize, ctx: &mut Ctx) -> bool {
         if self.pos == ctx.end_pos {

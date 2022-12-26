@@ -157,6 +157,8 @@ fn solve(
 }
 
 fn main() {
+    let now = std::time::Instant::now();
+
     let args: Vec<String> = env::args().collect();
     let file_path = match args.len() {
         2 => &args[1],
@@ -203,6 +205,9 @@ fn main() {
     let back = solve(end_pos, start_pos, &map_stages, ans.end_time);
     let again = solve(start_pos, end_pos, &map_stages, back.end_time);
     println!("{}", ans.num_moves + back.num_moves + again.num_moves);
+
+    let time = now.elapsed().as_millis();
+    eprintln!("Time: {}ms", time);
 }
 
 fn calculate_hash<T: Hash>(t: &T) -> u64 {

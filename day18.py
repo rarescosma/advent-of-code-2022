@@ -3,9 +3,8 @@ from dataclasses import dataclass
 from itertools import product
 from pathlib import Path
 from textwrap import dedent
-from typing import Generator
+from typing import Any, Generator
 
-real_data = Path("inputs/18.txt").read_text().splitlines()
 test_data = dedent(
     """
 2,2,2
@@ -24,31 +23,38 @@ test_data = dedent(
 """.strip()
 ).splitlines()
 
+real_data = Path("inputs/18.txt").read_text().splitlines()
+real: bool = True
+
+the_data = real_data if real else test_data
+
 
 @dataclass(order=True, frozen=True)
 class Cube:
-    x: int
-    y: int
-    z: int
+    x_pos: int
+    y_pos: int
+    z_pos: int
 
     def neighs(self) -> Generator["Cube", None, None]:
         for step, coord in product((-1, 1), range(3)):
             deltas = [0, 0, 0]
             deltas[coord] = step
-            dx, dy, dz = deltas
-            yield Cube(self.x + dx, self.y + dy, self.z + dz)
+            _dx, _dy, _dz = deltas
+            yield Cube(self.x_pos + _dx, self.y_pos + _dy, self.z_pos + _dz)
 
-    def dim(self, d: int) -> int:
-        if d == 0:
-            return self.x
-        if d == 1:
-            return self.y
-        if d == 2:
-            return self.z
-        raise ValueError(f"unknown dimension: {d}")
+    def __getitem__(self, item: Any) -> int:
+        if not isinstance(item, int):
+            raise TypeError
+        if item == 0:
+            return self.x_pos
+        if item == 1:
+            return self.y_pos
+        if item == 2:
+            return self.z_pos
+        raise ValueError(f"unknown dimension: {item}")
 
     def is_within(self, bot: "Cube", top: "Cube") -> bool:
-        return all(bot.dim(_) <= self.dim(_) <= top.dim(_) for _ in range(3))
+        return all(bot[_] <= self[_] <= top[_] for _ in range(3))
 
 
 @dataclass(frozen=True)
@@ -57,8 +63,12 @@ class Face:
     bot: Cube
 
     @classmethod
-    def from_cubes(cls, c1: Cube, c2: Cube) -> "Face":
-        return cls(top=c1, bot=c2) if c1 < c2 else cls(top=c2, bot=c1)
+    def from_cubes(cls, a_cube: Cube, b_cube: Cube) -> "Face":
+        return (
+            cls(top=a_cube, bot=b_cube)
+            if a_cube < b_cube
+            else cls(top=b_cube, bot=a_cube)
+        )
 
 
 def common_faces(cs1: set[Cube], cs2: set[Cube]) -> set[Face]:
@@ -70,14 +80,14 @@ def common_faces(cs1: set[Cube], cs2: set[Cube]) -> set[Face]:
 
 
 def dfs_fill(droplet: set[Cube]) -> set[Cube]:
-    bb_bot = Cube(*[min(_.dim(d) for _ in droplet) - 1 for d in range(3)])
-    bb_top = Cube(*[max(_.dim(d) for _ in droplet) + 1 for d in range(3)])
+    bb_bot = Cube(*[min(_[d] for _ in droplet) - 1 for d in range(3)])
+    bb_top = Cube(*[max(_[d] for _ in droplet) + 1 for d in range(3)])
 
     air = set()
-    q = deque([bb_bot])
+    queue = deque([bb_bot])
 
-    while q:
-        k = q.popleft()
+    while queue:
+        k = queue.popleft()
 
         for neigh in k.neighs():
             if (
@@ -87,12 +97,12 @@ def dfs_fill(droplet: set[Cube]) -> set[Cube]:
             ):
                 continue
             air.add(neigh)
-            q.append(neigh)
+            queue.append(neigh)
 
     return air
 
 
-cubes = {Cube(*[int(_) for _ in line.split(",")]) for line in real_data}
+cubes = {Cube(*[int(_) for _ in line.split(",")]) for line in the_data}
 
 # Part 1
 print(6 * len(cubes) - 2 * len(common_faces(cubes, cubes)))

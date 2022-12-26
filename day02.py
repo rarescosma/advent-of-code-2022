@@ -10,28 +10,28 @@ rps = {
 }
 
 
-def play(other: int, me: int) -> int:
-    if other == me:
-        return 3 + me
-    if win(other) == me:
-        return 6 + me
-    return me
+def play(other: int, myself: int) -> int:
+    if other == myself:
+        return 3 + myself
+    if win(other) == myself:
+        return 6 + myself
+    return myself
 
 
-def strat(o: int, s: int) -> int:
-    if s == 2:
-        return 3 + o
-    if s == 1:
-        return lose(o)
-    return 6 + win(o)
+def strat(other: int, myself: int) -> int:
+    if myself == 2:
+        return 3 + other
+    if myself == 1:
+        return lose(other)
+    return 6 + win(other)
 
 
-def win(o: int) -> int:
-    return (o % 3) + 1
+def win(other: int) -> int:
+    return (other % 3) + 1
 
 
-def lose(o: int) -> int:
-    return (o - 1) or 3
+def lose(other: int) -> int:
+    return (other - 1) or 3
 
 
 lines = Path("inputs/02.txt").read_text().splitlines()

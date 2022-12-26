@@ -29,16 +29,16 @@ test_data = dedent(
 
 real_data = Path("inputs/22.txt").read_text().splitlines()
 
-real = True
+real: bool = True
 
 if real:
     the_data = [_ for _ in real_data[:-2] if _]
     the_walk = real_data[-1]
-    face_size = 50
+    FACE_SIZE = 50
 else:
     the_data = [_ for _ in test_data[:-2] if _]
     the_walk = test_data[-1]
-    face_size = 4
+    FACE_SIZE = 4
 
 INT_RE = re.compile(r"\d+")
 DIR_RE = re.compile(r"[RL]")
@@ -64,8 +64,8 @@ class Pos(NamedTuple):
         return Pos(self.x + other.x, self.y + other.y)
 
     @classmethod
-    def from_point(cls, p: "Point") -> "Pos":
-        return Pos(int(p.x), int(p.y))
+    def from_point(cls, point: "Point") -> "Pos":
+        return Pos(int(point.x_coord), int(point.y_coord))
 
 
 deltas = [Pos(1, 0), Pos(0, 1), Pos(-1, 0), Pos(0, -1)]
@@ -84,22 +84,22 @@ def parse_map(_the_data: list[str]) -> "Map":
     grid = {}
     max_y = len(_the_data)
     max_x = max(len(_) for _ in _the_data)
-    for y in range(max_y):
-        row = _the_data[y]
-        for x, tile in enumerate(row):
-            grid[Pos(x, y)] = tiles[tile]
-        for x in range(len(row), max_x):
-            grid[Pos(x, y)] = OUT
+    for _y in range(max_y):
+        row = _the_data[_y]
+        for _x, tile in enumerate(row):
+            grid[Pos(_x, _y)] = tiles[tile]
+        for _x in range(len(row), max_x):
+            grid[Pos(_x, _y)] = OUT
 
     row_spans = [(0, 0)] * max_y
-    for y in range(max_y):
-        _row = [p.x for p, tile in grid.items() if p.y == y and tile != OUT]
-        row_spans[y] = (min(_row), min(_row) + len(_row))
+    for _y in range(max_y):
+        _row = [p.x for p, tile in grid.items() if p.y == _y and tile != OUT]
+        row_spans[_y] = (min(_row), min(_row) + len(_row))
 
     col_spans = [(0, 0)] * max_x
-    for x in range(max_x):
-        _col = [p.y for p, tile in grid.items() if p.x == x and tile != OUT]
-        col_spans[x] = (min(_col), min(_col) + len(_col))
+    for _x in range(max_x):
+        _col = [p.y for p, tile in grid.items() if p.x == _x and tile != OUT]
+        col_spans[_x] = (min(_col), min(_col) + len(_col))
 
     return Map(grid, max_x, max_y, row_spans, col_spans)
 
@@ -117,9 +117,9 @@ PointId = int
 
 @dataclass(frozen=True, order=True)
 class Point:
-    x: float
-    y: float
-    z: float = 0
+    x_coord: float
+    y_coord: float
+    z_coord: float = 0
     pid: PointId = -1
 
     @classmethod
@@ -135,7 +135,11 @@ class Point:
         raise ValueError
 
     def __add__(self, other: "Point") -> "Point":
-        return Point(self.x + other.x, self.y + other.y, self.z + other.z)
+        return Point(
+            self.x_coord + other.x_coord,
+            self.y_coord + other.y_coord,
+            self.z_coord + other.z_coord,
+        )
 
     def nameless(self) -> "Point":
         return replace(self, pid=-1)
@@ -144,26 +148,29 @@ class Point:
         if not isinstance(key, int):
             raise TypeError
         if key == 0:
-            return self.x
+            return self.x_coord
         if key == 1:
-            return self.y
+            return self.y_coord
         if key == 2:
-            return self.z
+            return self.z_coord
         raise ValueError
 
-    def change_dim(self, dim: int, f: Callable[[float], float]) -> "Point":
-        coords = [self.x, self.y, self.z]
-        coords[dim] = f(coords[dim])
-        return replace(self, **{"xyz"[dim]: coords[dim]})
+    def change_dim(self, dim: int, func: Callable[[float], float]) -> "Point":
+        update = {"xyz"[dim] + "_coord": func(self[dim])}
+        return replace(self, **update)
 
-    def is_between(self, dim: int, p0: "Point", p1: "Point") -> bool:
-        p_min = min(p0[dim], p1[dim])
-        p_max = max(p0[dim], p1[dim])
+    def is_between(self, dim: int, a_point: "Point", b_point: "Point") -> bool:
+        p_min = min(a_point[dim], b_point[dim])
+        p_max = max(a_point[dim], b_point[dim])
         return p_min < self[dim] < p_max
 
-    def forms_edge_with(self, p: "Point") -> bool:
-        return (self.x == p.x and abs(self.y - p.y) == face_size) or (
-            self.y == p.y and abs(self.x - p.x) == face_size
+    def forms_edge_with(self, other: "Point") -> bool:
+        return (
+            self.x_coord == other.x_coord
+            and abs(self.y_coord - other.y_coord) == FACE_SIZE
+        ) or (
+            self.y_coord == other.y_coord
+            and abs(self.x_coord - other.x_coord) == FACE_SIZE
         )
 
     def rotate(
@@ -181,8 +188,8 @@ class Point:
 
         # translate it back
         coords = [coords[_] + (orig[_] if _ != dim else 0) for _ in range(3)]
-        x, y, z = coords[:3]
-        return Point(x, y, z, pid=self.pid)
+        _x, _y, _z = coords[:3]
+        return Point(_x, _y, _z, pid=self.pid)
 
 
 Edge = tuple[PointId, PointId]
@@ -207,11 +214,11 @@ class Fold:
         return cls(pid0, pid1, mobile_pids)
 
     def fold(self, named: set[Point], clockwise: bool = True) -> set[Point]:
-        p0, p1 = get_named(named, self.pid0), get_named(named, self.pid1)
-        dim = next(_ for _ in range(3) if p0[_] != p1[_])
+        pt_0, pt_1 = get_named(named, self.pid0), get_named(named, self.pid1)
+        dim = next(_ for _ in range(3) if pt_0[_] != pt_1[_])
 
         to_rot = {
-            _.rotate(dim, p1, clockwise)
+            _.rotate(dim, pt_1, clockwise)
             for _ in named
             if _.pid in self.mobile_pids
         }
@@ -227,9 +234,9 @@ def get_named(named: set[Point], pid: PointId) -> Point:
 def make_ring(contour: set[Edge]) -> dict[PointId, PointId]:
     # make a ring
     adj: Adjacency = defaultdict(set)
-    for p0, p1 in contour:
-        adj[p0] |= {p1}
-        adj[p1] |= {p0}
+    for pt_0, pt_1 in contour:
+        adj[pt_0] |= {pt_1}
+        adj[pt_1] |= {pt_0}
 
     cur = list(adj.keys())[0]
     seen = {cur}
@@ -252,11 +259,11 @@ def find_cube(named: set[Point], folds: list[Fold]) -> Adjacency:
             if num_points == 8:
                 _collate = defaultdict(set)
                 _adj: dict[PointId, set[PointId]] = defaultdict(set)
-                for p in sorted(_named):
-                    _collate[(p.x, p.y, p.z)].add(p.pid)
-                for vxs in _collate.values():
-                    for vx in vxs:
-                        _adj[vx] |= vxs - {vx}
+                for _ in sorted(_named):
+                    _collate[(_.x_coord, _.y_coord, _.z_coord)].add(_.pid)
+                for vertices in _collate.values():
+                    for vertex in vertices:
+                        _adj[vertex] |= vertices - {vertex}
                 return _adj
     return {}
 
@@ -275,59 +282,69 @@ class Portal:
     def from_edge(
         cls, edge: Edge, the_map: "Map", geo: "Geometry"
     ) -> Optional["Portal"]:
-        s0, s1 = edge
-        s0_adj = geo.cube_adj[s0] | {s0, s1}
-        s1_adj = geo.cube_adj[s1] | {s0, s1}
+        s0_pid, s1_pid = edge
+        s0_adj = geo.cube_adj[s0_pid] | {s0_pid, s1_pid}
+        s1_adj = geo.cube_adj[s1_pid] | {s0_pid, s1_pid}
         dest_cands = {
             (m0, m1)
             for (m0, m1) in itertools.product(s0_adj, s1_adj)
             if geo.contour & {(m0, m1), (m1, m0)}
-        }
-        if not dest_cands - {(s0, s1), (s1, s0)}:
+        } - {(s0_pid, s1_pid), (s1_pid, s0_pid)}
+        if not dest_cands:
             # not a true portal, just an inside edge
             return None
 
-        dest: Edge = next(iter(dest_cands - {(s0, s1), (s1, s0)}))
+        dest: Edge = next(iter(dest_cands))
         get_point = partial(get_named, geo.vertices)
-        d0, d1 = get_point(dest[0]), get_point(dest[1])
+        d0_point, d1_point = get_point(dest[0]), get_point(dest[1])
 
-        if d0.x == d1.x:
+        if d0_point.x_coord == d1_point.x_coord:
             dest_axis = 0
-            probe = Pos.from_point(Point(d0.x - 0.5, (d0.y + d1.y) // 2))
+            probe = Pos.from_point(
+                Point(
+                    d0_point.x_coord - 0.5,
+                    (d0_point.y_coord + d1_point.y_coord) // 2,
+                )
+            )
             if the_map.grid.get(probe, OUT) == OUT:
                 dest_dir, delta = RIGHT, Point(0.5, 0)
             else:
                 dest_dir, delta = LEFT, Point(-0.5, 0)
         else:
             dest_axis = 1
-            probe = Pos.from_point(Point((d0.x + d1.x) // 2, d0.y - 0.5))
+            probe = Pos.from_point(
+                Point(
+                    (d0_point.x_coord + d1_point.x_coord) // 2,
+                    d0_point.y_coord - 0.5,
+                )
+            )
             if the_map.grid.get(probe, OUT) == OUT:
                 dest_dir, delta = DOWN, Point(0, 0.5)
             else:
                 dest_dir, delta = UP, Point(0, -0.5)
 
-        s0_point, s1_point = get_point(s0), get_point(s1)
+        s0_point, s1_point = get_point(s0_pid), get_point(s1_pid)
         return cls(
             (s0_point, s1_point),
-            (d0, d1),
-            (0 if s0_point.x == s1_point.x else 1),
+            (d0_point, d1_point),
+            (0 if s0_point.x_coord == s1_point.x_coord else 1),
             dest_axis,
             dest_dir,
-            (-1 if (d0 > d1) != (s0_point > s1_point) else 1),
+            (-1 if (d0_point > d1_point) != (s0_point > s1_point) else 1),
             delta,
         )
 
     def passes_thru(self, the_map: "Map", old_pos: Pos, new_pos: Pos) -> bool:
-        s0, s1 = self.src
+        s0_point, s1_point = self.src
         old_pt = Point.from_pos(old_pos)
         new_pt = Point.from_pos(new_pos)
 
         dim = self.src_axis
         conv = Point.planar_converse(dim)
-        if s0[dim] == s1[dim] and new_pt[dim] != old_pt[dim]:
+        if s0_point[dim] == s1_point[dim] and new_pt[dim] != old_pt[dim]:
             return (
-                old_pt.is_between(conv, s0, s1)
-                and s0.is_between(dim, old_pt, new_pt)
+                old_pt.is_between(conv, s0_point, s1_point)
+                and s0_point.is_between(dim, old_pt, new_pt)
                 and the_map.grid.get(new_pos, OUT) == OUT
             )
         return False
@@ -335,12 +352,12 @@ class Portal:
     def teleport(self, old_pos: Pos) -> tuple[Pos, Direction]:
         # translate from s0 to d0
         old_pt = Point.from_pos(old_pos)
-        s0, _ = self.src
-        d0, _ = self.dest
+        s0_point, _ = self.src
+        d0_point, _ = self.dest
         conv = Point.planar_converse(self.src_axis)
-        a_diff = old_pt[conv] - s0[conv]
+        a_diff = old_pt[conv] - s0_point[conv]
 
-        new_pt = (d0 + self.delta).change_dim(
+        new_pt = (d0_point + self.delta).change_dim(
             Point.planar_converse(self.dest_axis),
             lambda c: c + self.signum * a_diff,
         )
@@ -361,9 +378,18 @@ class Geometry:
         squares = [
             [p0, p1, p2, p3]
             for (p0, p1, p2, p3) in itertools.permutations(vertices, r=4)
-            if (p1.y == p0.y and p1.x == p0.x + face_size)
-            and (p2.x == p0.x and p2.y == p0.y + face_size)
-            and (p3.x == p0.x + face_size and p3.y == p0.y + face_size)
+            if (
+                p1.y_coord == p0.y_coord
+                and p1.x_coord == p0.x_coord + FACE_SIZE
+            )
+            and (
+                p2.x_coord == p0.x_coord
+                and p2.y_coord == p0.y_coord + FACE_SIZE
+            )
+            and (
+                p3.x_coord == p0.x_coord + FACE_SIZE
+                and p3.y_coord == p0.y_coord + FACE_SIZE
+            )
         ]
 
         common = {
@@ -398,17 +424,17 @@ class Map:
     def get_portals(self) -> list[Portal]:
         vertex_rows = sorted(
             [
-                *range(0, self.max_y, face_size),
-                *range(self.max_y - 1, 0, -face_size),
+                *range(0, self.max_y, FACE_SIZE),
+                *range(self.max_y - 1, 0, -FACE_SIZE),
             ]
         )
         vxs = set()
-        for y in vertex_rows:
-            x0, x1 = self.row_spans[y]
-            if y % face_size != 0:
-                y += 1
-            for x in range(x0, x1 + 1, face_size):
-                vxs.add(Point(x - 0.5, y - 0.5, -0.5))
+        for _y in vertex_rows:
+            x_start, x_end = self.row_spans[_y]
+            if _y % FACE_SIZE != 0:
+                _y += 1
+            for _x in range(x_start, x_end + 1, FACE_SIZE):
+                vxs.add(Point(_x - 0.5, _y - 0.5, -0.5))
 
         geo = Geometry.from_vertices(vxs)
 
@@ -421,74 +447,74 @@ class Map:
 
 def wrapping_move(cur: Pos, _grid: Map, delta: Pos) -> Optional[Pos]:
     # get the next pos (with wrapping)
-    np = cur + delta
+    next_pos = cur + delta
 
     (_row_start, _row_end) = _grid.row_spans[cur.y]
-    if np.x == _row_end:
-        np = Pos(_row_start, np.y)
-    elif np.x < _row_start:
-        np = Pos(_row_end - 1, np.y)
+    if next_pos.x == _row_end:
+        next_pos = Pos(_row_start, next_pos.y)
+    elif next_pos.x < _row_start:
+        next_pos = Pos(_row_end - 1, next_pos.y)
 
     (_col_start, _col_end) = _grid.col_spans[cur.x]
-    if np.y == _col_end:
-        np = Pos(np.x, _col_start)
-    elif np.y < _col_start:
-        np = Pos(np.x, _col_end - 1)
+    if next_pos.y == _col_end:
+        next_pos = Pos(next_pos.x, _col_start)
+    elif next_pos.y < _col_start:
+        next_pos = Pos(next_pos.x, _col_end - 1)
 
-    if _grid.grid[np] == WALL:
+    if _grid.grid[next_pos] == WALL:
         return None
 
-    return np
+    return next_pos
 
 
 # Part 1
 m_map, m_walk = parse_map(the_data), parse_walk(the_walk)
-cur_pos = Pos(m_map.row_spans[0][0], 0)
-facing = RIGHT
+cur_pos_p1: Pos = Pos(m_map.row_spans[0][0], 0)
+FACING_P1: int = RIGHT
 for instr in m_walk:
     if isinstance(instr, str):
         # change orientation - right is clockwise
-        facing = (facing + (1 if instr == "R" else -1)) % 4
+        FACING_P1 = (FACING_P1 + (1 if instr == "R" else -1)) % 4
     elif isinstance(instr, int):
         # attempt walking
-        walked = 0
-        while walked < instr:
-            _new_pos = wrapping_move(cur_pos, m_map, deltas[facing])
+        walked_p1: int = 0
+        while walked_p1 < instr:
+            _new_pos = wrapping_move(cur_pos_p1, m_map, deltas[FACING_P1])
             if _new_pos is None:
                 break
-            cur_pos = _new_pos
-            walked += 1
+            cur_pos_p1 = _new_pos
+            walked_p1 += 1
 
-final_col, final_row = cur_pos
-ans1 = 1000 * (final_row + 1) + 4 * (final_col + 1) + facing
+final_col, final_row = cur_pos_p1
+ans1 = 1000 * (final_row + 1) + 4 * (final_col + 1) + FACING_P1
 print(ans1)
 
 
 # Part 2
 portals = m_map.get_portals()
-cur_pos = Pos(m_map.row_spans[0][0], 0)
-facing = RIGHT
+cur_pos_p2: Pos = Pos(m_map.row_spans[0][0], 0)
+FACING_P2: int = RIGHT
 for instr in m_walk:
     if isinstance(instr, str):
         # change orientation - right is clockwise
-        facing = (facing + (1 if instr == "R" else -1)) % 4
+        FACING_P2 = (FACING_P2 + (1 if instr == "R" else -1)) % 4
     elif isinstance(instr, int):
         # attempt walking
-        walked = 0
-        while walked < instr:
-            _new_pos = cur_pos + deltas[facing]
-            old_facing = facing
+        walked_p2: int = 0
+        while walked_p2 < instr:
+            _new_pos = cur_pos_p2 + deltas[FACING_P2]
+            old_facing: int = FACING_P2
             # teleport no matter what
             for _portal in portals:
-                if _portal.passes_thru(m_map, cur_pos, _new_pos):
-                    _new_pos, facing = _portal.teleport(cur_pos)
+                if _portal.passes_thru(m_map, cur_pos_p2, _new_pos):
+                    _new_pos, FACING_P2 = _portal.teleport(cur_pos_p2)
                     break
             if m_map.grid[_new_pos] == WALL:
-                facing = old_facing
+                FACING_P2 = old_facing
                 break
-            cur_pos = _new_pos
-            walked += 1
+            cur_pos_p2 = _new_pos
+            walked_p2 += 1
 
-final_col, final_row = cur_pos
-ans2 = 1000 * (final_row + 1) + 4 * (final_col + 1) + facing
+final_col, final_row = cur_pos_p2
+ans2 = 1000 * (final_row + 1) + 4 * (final_col + 1) + FACING_P2
 print(ans2)

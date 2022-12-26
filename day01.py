@@ -2,18 +2,23 @@ from pathlib import Path
 
 lines = Path("inputs/01.txt").read_text().splitlines()
 
-elves = []
-elf = 0
-for line in lines:
-    if line:
-        elf += int(line)
-    else:
-        elves.append(elf)
-        elf = 0
+
+def solve() -> list[int]:
+    elves = []
+    elf = 0
+    for line in lines:
+        if line:
+            elf += int(line)
+        else:
+            elves.append(elf)
+            elf = 0
+    return elves
+
 
 # Part 1
-print(max(elves))
+_elves = solve()
+print(max(_elves))
 
 # Part 2
-elves.sort()
-print(sum(elves[-3:]))
+_elves.sort()
+print(sum(_elves[-3:]))

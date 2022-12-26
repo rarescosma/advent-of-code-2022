@@ -23,7 +23,7 @@ p1 = sum(
 print(p1)
 
 # Part 2
-p2 = 0
+p2: int = 0
 for x in range(0, len(lines), 3):
     l1 = to_prios(lines[x])
     l2 = to_prios(lines[x + 1])

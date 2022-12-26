@@ -10,8 +10,8 @@ class Range:
     end: int
 
     @classmethod
-    def from_str(cls, x: str) -> "Range":
-        range_ends = x.split("-")
+    def from_str(cls, a_string: str) -> "Range":
+        range_ends = a_string.split("-")
         return cls(start=int(range_ends[0]), end=int(range_ends[1]))
 
     def contains(self, other: "Range") -> bool:
@@ -24,8 +24,8 @@ class Range:
         return not (self.end < other.start or other.end < self.start)
 
 
-p1 = 0
-p2 = 0
+p1: int = 0
+p2: int = 0
 for line in lines:
     r1, r2 = map(Range.from_str, line.split(","))
     if r1.contains(r2) or r2.contains(r1):

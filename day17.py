@@ -7,9 +7,13 @@ test_data = dedent(
 """.strip()
 )
 
+real_data = Path("inputs/17.txt").read_text().strip()
+real: bool = True
+
+the_data = real_data if real else test_data
+
 W = 7
 HASH_WINDOW = 10
-real_data = Path("inputs/17.txt").read_text().strip()
 Solid = set[complex]
 Rock = set[complex]
 shapes: list[Rock] = [
@@ -21,8 +25,8 @@ shapes: list[Rock] = [
 ]
 
 
-def move_rock(_rock: Rock, dc: complex) -> Rock:
-    return {_ + dc for _ in _rock}
+def move_rock(_rock: Rock, delta: complex) -> Rock:
+    return {_ + delta for _ in _rock}
 
 
 def hash_state(_map: Solid, end_y: int) -> frozenset:
@@ -78,7 +82,7 @@ def find_pattern(
     return top, 0, 0
 
 
-_jets = [-1 if c == "<" else 1 for c in real_data]
+_jets = [-1 if c == "<" else 1 for c in the_data]
 
 # Part 1
 ans1 = find_pattern(_jets, 2022, False)
@@ -86,8 +90,8 @@ print(ans1[0])
 
 
 # Part 2
-n_pieces = 1_000_000_000_000
+N_PIECES = 1_000_000_000_000
 offset, modulus, _dy = find_pattern(_jets, 5 * len(_jets), True)
-quot, rem = divmod(n_pieces - offset, modulus)
+quot, rem = divmod(N_PIECES - offset, modulus)
 ans2 = quot * _dy + find_pattern(_jets, offset + rem, False)[0]
 print(ans2)

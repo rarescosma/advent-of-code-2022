@@ -27,12 +27,15 @@ hmdt: 32
 ).splitlines()
 
 real_data = Path("inputs/21.txt").read_text().splitlines()
+real: bool = True
+
+the_data = real_data if real else test_data
 
 
 @dataclass
 class Monkey:
     l_term: str
-    op: str
+    oper: str
     r_term: str
 
 
@@ -43,7 +46,7 @@ INV = {"*": "/", "/": "*", "+": "-", "-": "+"}
 HUMN = "humn"
 
 items: dict[str, Item] = {}
-for line in real_data:
+for line in the_data:
     parts = line.split(": ")
     if parts[1].isnumeric():
         items[parts[0]] = int(parts[1])
@@ -56,7 +59,9 @@ def solve(item_id: str, _items: dict[str, Item]) -> int:
     item = _items[item_id]
     if isinstance(item, int):
         return item
-    return OPS[item.op](solve(item.l_term, _items), solve(item.r_term, _items))
+    return OPS[item.oper](
+        solve(item.l_term, _items), solve(item.r_term, _items)
+    )
 
 
 def solve_equation(_items: dict[str, Item]) -> int:
@@ -93,13 +98,13 @@ def solve_equation(_items: dict[str, Item]) -> int:
             # l_term - r_term = right => r_term = l_term - right
             assert isinstance(_items[cur.l_term], int)
             l_val = _solve(cur.l_term)
-            if cur.op == "*":
+            if cur.oper == "*":
                 right = right // l_val
-            elif cur.op == "/":
+            elif cur.oper == "/":
                 right = l_val // right
-            elif cur.op == "+":
+            elif cur.oper == "+":
                 right = right - l_val
-            elif cur.op == "-":
+            elif cur.oper == "-":
                 right = l_val - right
             cur = _items[cur.r_term]
         # move cur.r_term to the other side
@@ -110,11 +115,11 @@ def solve_equation(_items: dict[str, Item]) -> int:
             # l_term - r_term = right => l_term = right + r_term
             assert isinstance(_items[cur.r_term], int)
             r_val = _solve(cur.r_term)
-            right = OPS[INV[cur.op]](right, r_val)
+            right = OPS[INV[cur.oper]](right, r_val)
             cur = _items[cur.l_term]
 
     assert isinstance(cur, Monkey)
-    return OPS[INV[cur.op]](right, _solve(cur.r_term))
+    return OPS[INV[cur.oper]](right, _solve(cur.r_term))
 
 
 # Part 1

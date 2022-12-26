@@ -9,8 +9,8 @@ INT_RE = re.compile(r"\d+")
 real_data = Path("inputs/16.txt").read_text()
 
 
-def extract_int(v: str) -> int:
-    return int(next(iter(INT_RE.findall(v))))
+def extract_int(from_str: str) -> int:
+    return int(next(iter(INT_RE.findall(from_str))))
 
 
 lines = sorted(real_data.splitlines(), key=extract_int, reverse=True)
@@ -28,17 +28,17 @@ for line in real_data.splitlines():
 def compute_distances(start: str) -> dict[str, int]:
     # minimum number of steps to reach all other nodes starting at start
     seen = {start}
-    q = deque(valves[start])
+    queue = deque(valves[start])
     depth = 0
 
     ret = {}
     q_a: list[str] = []
     while len(seen) < num_valves:
-        q.extend(q_a)
+        queue.extend(q_a)
         depth += 1
         q_a.clear()
-        while q:
-            orig = q.popleft()
+        while queue:
+            orig = queue.popleft()
             seen.add(orig)
             ret[orig] = depth
             q_a.extend(valves[orig] - seen)
@@ -55,11 +55,11 @@ for i, valve in enumerate(flows):
 cache: dict[tuple, int] = {}
 
 
-def dfs(cur: str, bitmask: int, t: int, p2: bool = False) -> int:
-    if (cur, bitmask, t, p2) in cache:
-        return cache[(cur, bitmask, t, p2)]
+def dfs(cur: str, bitmask: int, time: int, part2: bool = False) -> int:
+    if (cur, bitmask, time, part2) in cache:
+        return cache[(cur, bitmask, time, part2)]
 
-    score = dfs("AA", bitmask, 26) if p2 else 0
+    score = dfs("AA", bitmask, 26) if part2 else 0
 
     for neighbor in distances[cur]:
         if neighbor not in flows:
@@ -67,15 +67,16 @@ def dfs(cur: str, bitmask: int, t: int, p2: bool = False) -> int:
         bit = 1 << indices[neighbor]
         if bitmask & bit:
             continue
-        rem_t = t - distances[cur][neighbor] - 1
+        rem_t = time - distances[cur][neighbor] - 1
         if rem_t <= 0:
             continue
         score = max(
             score,
-            dfs(neighbor, bitmask | bit, rem_t, p2) + flows[neighbor] * rem_t,
+            dfs(neighbor, bitmask | bit, rem_t, part2)
+            + flows[neighbor] * rem_t,
         )
 
-    cache[(cur, bitmask, t, p2)] = score
+    cache[(cur, bitmask, time, part2)] = score
     return score
 
 
@@ -84,5 +85,5 @@ ans = dfs("AA", 0, 30)
 print(ans)
 
 # Part 2
-ans2 = dfs("AA", 0, 26, p2=True)
+ans2 = dfs("AA", 0, 26, part2=True)
 print(ans2)

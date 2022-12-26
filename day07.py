@@ -16,7 +16,7 @@ class State:
     cur_dir: PurePath
     dirs: dict[str, int]
 
-    def up(self) -> "State":
+    def go_up(self) -> "State":
         return replace(self, cur_dir=self.cur_dir.parent)
 
     def chdir(self, child: str) -> "State":
@@ -63,7 +63,7 @@ def next_command(lines: list[str]) -> Generator[Command, None, None]:
 def update_state(_state: State, _cmd: Command) -> State:
     if _cmd.cmd == "cd":
         if _cmd.args[0] == "..":
-            return _state.up()
+            return _state.go_up()
         return _state.chdir(_cmd.args[0])
     if _cmd.cmd == "ls":
         return _state.update_sizes(_cmd.output)
@@ -76,7 +76,7 @@ for cmd in next_command(Path("inputs/07.txt").read_text().splitlines()):
     state = update_state(state, cmd)
 
 # Part 1
-a1 = 0
+a1: int = 0
 for _, v in state.dirs.items():
     if v <= 100000:
         a1 += v
@@ -84,8 +84,8 @@ print(a1)
 
 # Part 2
 tot_size = 70000000 - state.dirs["/"]
-needed = 30000000
-a2 = 1e12
+needed: int = 30000000
+a2: int = int(1e12)
 for _, v in state.dirs.items():
     if v < a2 and (tot_size + v) >= needed:
         a2 = v

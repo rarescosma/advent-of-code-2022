@@ -9,12 +9,16 @@ test_data = dedent(
 )
 
 real_data = Path("inputs/14.txt").read_text()
+real: bool = True
+
+the_data = real_data if real else test_data
+
 
 G = set()
-floor = 0
-orig: complex = 500
+floor: int = 0
+ORIG: complex = 500
 
-for line in real_data.splitlines():
+for line in the_data.splitlines():
     pairs = [list(map(int, p.split(","))) for p in line.split(" -> ")]
 
     for (x0, y0), (x1, y1) in zip(pairs, pairs[1:]):
@@ -26,26 +30,26 @@ for line in real_data.splitlines():
                 floor = max(floor, y + 1)
 
 
-def solve(part: int, g: set[complex]) -> int:
-    t = 0
-    while part == 1 or orig not in g:
-        s: complex = orig
+def solve(part: int, grid: set[complex]) -> int:
+    time = 0
+    while part == 1 or ORIG not in grid:
+        sand: complex = ORIG
         while True:
-            if s.imag >= floor:
+            if sand.imag >= floor:
                 if part == 1:
-                    return t
+                    return time
                 break
-            if s + 1j not in g:
-                s += 1j
-            elif s - 1 + 1j not in g:
-                s += -1 + 1j
-            elif s + 1 + 1j not in g:
-                s += 1 + 1j
+            if sand + 1j not in grid:
+                sand += 1j
+            elif sand - 1 + 1j not in grid:
+                sand += -1 + 1j
+            elif sand + 1 + 1j not in grid:
+                sand += 1 + 1j
             else:
                 break
-        g.add(s)
-        t += 1
-    return t
+        grid.add(sand)
+        time += 1
+    return time
 
 
 print(solve(1, deepcopy(G)))

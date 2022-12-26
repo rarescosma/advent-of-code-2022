@@ -11,6 +11,10 @@ COST_RE: Pattern = re.compile(r"\d+\s[a-z]+")
 
 test_data = Path("inputs/19_t.txt").read_text().splitlines()
 real_data = Path("inputs/19.txt").read_text().splitlines()
+real: bool = True
+
+the_data = real_data if real else test_data
+
 
 CostItem = tuple[int, int]
 Cost = list[CostItem]
@@ -22,21 +26,21 @@ def get_costs(bp_line: str) -> list:
     return [COST_RE.findall(_) for _ in bp_line.strip().split(".")[:-1]]
 
 
-def parse_blueprint(bp: str) -> Costs:
-    blueprint: Costs = []
-    for i, recipes in enumerate(get_costs(bp)):
-        blueprint.append([])
+def parse_blueprint(blueprint: str) -> Costs:
+    costs: Costs = []
+    for i, recipes in enumerate(get_costs(blueprint)):
+        costs.append([])
         for recipe in recipes:
             amt, rtype = recipe.split(" ")
-            blueprint[i].append(
+            costs[i].append(
                 (int(amt), ["ore", "clay", "obsidian"].index(rtype))
             )
-    return blueprint
+    return costs
 
 
-def wait_time(c: list[CostItem], res: list[int], bots: list[int]) -> int:
+def wait_time(costs: list[CostItem], res: list[int], bots: list[int]) -> int:
     max_wait = 0
-    for amt, resource_type in c:
+    for amt, resource_type in costs:
         if bots[resource_type] == 0:
             return 2**8
         max_wait = max(
@@ -54,15 +58,15 @@ def get_max_bots(costs: Costs) -> list[int]:
     return max_bots
 
 
-def dfs(max_bots: list[int], costs: Costs, t: int) -> int:
+def dfs(max_bots: list[int], costs: Costs, time: int) -> int:
     seen = set()
-    q = deque([([0, 0, 0, 0], [1, 0, 0, 0], t)])
+    queue = deque([([0, 0, 0, 0], [1, 0, 0, 0], time)])
     best = 0
 
-    while q:
-        res, bots, t = q.popleft()
+    while queue:
+        res, bots, time = queue.popleft()
 
-        best = max(best, res[GEODE] + bots[GEODE] * t)
+        best = max(best, res[GEODE] + bots[GEODE] * time)
 
         for bot_type, blueprint in enumerate(costs):
             # Obs 1: do not build more than the max_bots number of bots
@@ -72,7 +76,7 @@ def dfs(max_bots: list[int], costs: Costs, t: int) -> int:
 
             wait = wait_time(blueprint, res, bots)
 
-            _t = t - wait - 1
+            _t = time - wait - 1
             if _t <= 0:
                 continue
             _bots = bots[:]
@@ -85,27 +89,27 @@ def dfs(max_bots: list[int], costs: Costs, t: int) -> int:
             for res_type in range(3):
                 _res[res_type] = min(_res[res_type], max_bots[res_type] * _t)
 
-            _k = tuple([t, *_res, *_bots])
+            _k = tuple([time, *_res, *_bots])
             if _k not in seen:
-                q.append((_res, _bots, _t))
+                queue.append((_res, _bots, _t))
                 seen.add(_k)
 
     return best
 
 
-def solve(line: str, t: int) -> int:
+def solve(line: str, start_time: int) -> int:
     m_costs = parse_blueprint(line)
-    return dfs(get_max_bots(m_costs), m_costs, t)
+    return dfs(get_max_bots(m_costs), m_costs, start_time)
 
 
 with Pool() as pool:
     # Part 1
     ans1 = sum(
         (i + 1) * v
-        for i, v in enumerate(pool.map(partial(solve, t=24), real_data))
+        for i, v in enumerate(pool.map(partial(solve, start_time=24), the_data))
     )
     print(ans1)
 
     # Part 2
-    ans2 = reduce(mul, pool.map(partial(solve, t=32), real_data[:3]), 1)
+    ans2 = reduce(mul, pool.map(partial(solve, start_time=32), the_data[:3]), 1)
     print(ans2)

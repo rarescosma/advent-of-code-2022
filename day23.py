@@ -17,7 +17,7 @@ test_data = dedent(
 ).splitlines()
 
 real_data = Path("inputs/23.txt").read_text().splitlines()
-real = True
+real: bool = True
 
 the_data = real_data if real else test_data
 
@@ -36,11 +36,11 @@ def parse_input(lines: list[str]) -> set[Pos]:
     the_map = set()
     max_y = len(lines)
     max_x = len(lines[0])
-    for y in range(max_y):
-        line = lines[y]
-        for x in range(max_x):
-            if line[x] == "#":
-                the_map.add(Pos(x, y))
+    for _y in range(max_y):
+        line = lines[_y]
+        for _x in range(max_x):
+            if line[_x] == "#":
+                the_map.add(Pos(_x, _y))
     return the_map
 
 
@@ -70,14 +70,14 @@ for _i in range(4):
     dirs.rotate(-1)
 
 
-def get_neighbors(p: Pos, n: int) -> list[list[Pos]]:
-    return [[p + delta for delta in deltas[i]] for i in the_dirs[n]]
+def get_neighbors(pos: Pos, dir_offset: int) -> list[list[Pos]]:
+    return [[pos + delta for delta in deltas[i]] for i in the_dirs[dir_offset]]
 
 
 def simulate(the_map: set[Pos], rounds: int, part: int = 0) -> int:
-    def check_pos(ps: Iterable[Pos]) -> bool:
-        for p in ps:
-            if p in the_map:
+    def check_pos(positions: Iterable[Pos]) -> bool:
+        for _pos in positions:
+            if _pos in the_map:
                 return False
         return True
 
@@ -92,20 +92,20 @@ def simulate(the_map: set[Pos], rounds: int, part: int = 0) -> int:
             checks = [check_pos(_) for _ in get_neighbors(elf, round_mod)[:4]]
             if all(checks):
                 continue
-            np = None
+            new_pos = None
             _dirs = the_dirs[round_mod]
             for i, check in enumerate(checks):
                 if check:
-                    np = elf + offsets[_dirs[i]]
+                    new_pos = elf + offsets[_dirs[i]]
                     break
-            if np is None:
+            if new_pos is None:
                 continue
-            new_pos_cnt[np] += 1
+            new_pos_cnt[new_pos] += 1
             from_pos.append(elf)
-            to_pos.append(np)
+            to_pos.append(new_pos)
         moved = False
-        for i, t in enumerate(to_pos):
-            if new_pos_cnt[t] > 1:
+        for i, times in enumerate(to_pos):
+            if new_pos_cnt[times] > 1:
                 continue
             the_map -= {from_pos[i]}
             the_map |= {to_pos[i]}

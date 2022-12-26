@@ -2,7 +2,7 @@ from collections import defaultdict, deque
 from copy import deepcopy
 from pathlib import Path
 from textwrap import dedent
-from typing import Iterable, NamedTuple
+from typing import Any, Iterable, NamedTuple
 
 test_data = dedent(
     """
@@ -26,7 +26,9 @@ class Pos(NamedTuple):
     x: int
     y: int
 
-    def __add__(self, other: "Pos") -> "Pos":
+    def __add__(self, other: Any) -> "Pos":
+        if not isinstance(other, Pos):
+            raise ValueError
         return Pos(self.x + other.x, self.y + other.y)
 
 
@@ -79,10 +81,10 @@ def simulate(the_map: set[Pos], rounds: int, part: int = 0) -> int:
                 return False
         return True
 
-    from_pos = []
-    to_pos = []
+    from_pos: list[Pos] = []
+    to_pos: list[Pos] = []
     for _ in range(rounds):
-        new_pos_cnt = defaultdict(int)
+        new_pos_cnt: dict[Pos, int] = defaultdict(int)
         round_mod = _ % 4
         from_pos.clear()
         to_pos.clear()

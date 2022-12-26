@@ -50,7 +50,6 @@ tiles = {
     ".": EMPTY,
     "#": WALL,
 }
-b_tiles = [" ", ".", "#"]
 Direction = int
 RIGHT, DOWN, LEFT, UP = 0, 1, 2, 3
 

@@ -1,6 +1,8 @@
 use aoc_2dmap::prelude::*;
 use aoc_dijsktra::{Dijsktra, GameState, Transform};
 use aoc_prelude::*;
+use std::env;
+use std::fs;
 use std::hash::{Hash, Hasher};
 use std::iter::once;
 
@@ -155,7 +157,16 @@ fn solve(
 }
 
 fn main() {
-    let input = read_input();
+    let args: Vec<String> = env::args().collect();
+    let file_path = match args.len() {
+        2 => &args[1],
+        _ => "inputs/24.txt",
+    };
+    let input: Vec<String> = fs::read_to_string(file_path)
+        .expect("argument should be a valid input file")
+        .lines()
+        .map(String::from)
+        .collect();
 
     let i_len = input.len();
     let map_size = (input[0].len() - 2, i_len - 2);
@@ -198,8 +209,4 @@ fn calculate_hash<T: Hash>(t: &T) -> u64 {
     let mut s = ahash::AHasher::default();
     t.hash(&mut s);
     s.finish()
-}
-
-fn read_input() -> Vec<&'static str> {
-    include_str!("../../../inputs/24.txt").lines().collect()
 }

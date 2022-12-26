@@ -295,20 +295,16 @@ class Portal:
             dest_axis = 0
             probe = Pos.from_point(Point(d0.x - 0.5, (d0.y + d1.y) // 2))
             if the_map.grid.get(probe, OUT) == OUT:
-                dest_dir = RIGHT
-                delta = Point(0.5, 0)
+                dest_dir, delta = RIGHT, Point(0.5, 0)
             else:
-                dest_dir = LEFT
-                delta = Point(-0.5, 0)
+                dest_dir, delta = LEFT, Point(-0.5, 0)
         else:
             dest_axis = 1
             probe = Pos.from_point(Point((d0.x + d1.x) // 2, d0.y - 0.5))
             if the_map.grid.get(probe, OUT) == OUT:
-                dest_dir = DOWN
-                delta = Point(0, 0.5)
+                dest_dir, delta = DOWN, Point(0, 0.5)
             else:
-                dest_dir = UP
-                delta = Point(0, -0.5)
+                dest_dir, delta = UP, Point(0, -0.5)
 
         s0_point, s1_point = get_point(s0), get_point(s1)
         return cls(

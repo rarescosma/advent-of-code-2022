@@ -52,6 +52,7 @@ impl GameState<Ctx<'_>> for State {
 
     fn accept(&self, _cost: usize, ctx: &mut Ctx) -> bool {
         if self.pos == ctx.end_pos {
+            // capture end time when reaching the end
             ctx.end_time = self.time;
             return true;
         }
@@ -65,12 +66,14 @@ impl GameState<Ctx<'_>> for State {
         let cycle_len = &ctx.map_stages.len();
         let next_map = &ctx.map_stages[(self.time + 1) % cycle_len];
 
+        // we can chill at start indefinitely
         if current_pos == ctx.start_pos {
             steps.push(Move(current_pos));
         }
 
         for n_pos in self.pos.neighbors_simple().chain(once(current_pos)) {
             match next_map.get(n_pos) {
+                // end_pos is on a "wall", so off map but still valid
                 None if n_pos == ctx.end_pos => steps.push(Move(n_pos)),
                 Some(Tile::Empty) => steps.push(Move(n_pos)),
                 _ => {}
@@ -137,12 +140,14 @@ fn solve(
         end_time: 0,
         map_stages,
     };
-    let state = State {
+
+    let num_moves = State {
         pos: start_pos,
         time: start_time,
-    };
+    }
+    .dijsktra(&mut ctx)
+    .unwrap_or_else(|| panic!("{:?} should be reachable", end_pos));
 
-    let num_moves = state.dijsktra(&mut ctx).unwrap();
     SolveRes {
         num_moves,
         end_time: ctx.end_time,
@@ -177,7 +182,7 @@ fn main() {
     }
 
     let start_pos: Pos = (0, -1).into();
-    let end_pos: Pos = Pos::from((map_size.0 - 1, map_size.1));
+    let end_pos = Pos::from((map_size.0 - 1, map_size.1));
 
     // Part 1 - there
     let ans = solve(start_pos, end_pos, &map_stages, 0);

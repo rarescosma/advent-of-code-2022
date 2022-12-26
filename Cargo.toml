@@ -1,9 +1,23 @@
 [workspace]
 members = [
-    "crates/aoc_2dmap",
-    "crates/aoc_prelude",
+    "aoc_prelude/crates/*",
     "2022",
 ]
+
+[workspace.dependencies]
+ahash = "0.8.2"
+arrayvec = "0.7.2"
+deku = "0.15.1"
+hashbrown = "0.13.1"
+hex = "0.4.3"
+itertools = "0.10.5"
+lazy_static = "1.4.0"
+multimap = { version ="0.8.3", default-features = false }
+num-iter = "0.1.43"
+num-traits = "0.2.15"
+pest = { version = "2.5.2", default-features = false }
+pest_derive = "2.5.2"
+regex = { version = "1.7", default-features = false, features = ["std", "unicode-perl"] }
 
 [profile.release]
 lto = "fat"

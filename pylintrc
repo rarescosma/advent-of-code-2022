@@ -2,7 +2,6 @@
 [MESSAGES CONTROL]
 disable=
     invalid-name,
-    no-else-return,
     too-few-public-methods,
     too-many-return-statements,
     missing-module-docstring,

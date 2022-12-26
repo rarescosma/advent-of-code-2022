@@ -34,8 +34,7 @@ def solve(part: int, g: set[complex]) -> int:
             if s.imag >= floor:
                 if part == 1:
                     return t
-                else:
-                    break
+                break
             if s + 1j not in g:
                 s += 1j
             elif s - 1 + 1j not in g:

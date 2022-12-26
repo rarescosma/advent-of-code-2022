@@ -130,7 +130,7 @@ class Point:
     def planar_converse(dim: int) -> int:
         if dim == 0:
             return 1
-        elif dim == 1:
+        if dim == 1:
             return 0
         raise ValueError
 
@@ -145,9 +145,9 @@ class Point:
             raise TypeError
         if key == 0:
             return self.x
-        elif key == 1:
+        if key == 1:
             return self.y
-        elif key == 2:
+        if key == 2:
             return self.z
         raise ValueError
 

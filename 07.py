@@ -64,9 +64,8 @@ def update_state(_state: State, _cmd: Command) -> State:
     if _cmd.cmd == "cd":
         if _cmd.args[0] == "..":
             return _state.up()
-        else:
-            return _state.chdir(_cmd.args[0])
-    elif _cmd.cmd == "ls":
+        return _state.chdir(_cmd.args[0])
+    if _cmd.cmd == "ls":
         return _state.update_sizes(_cmd.output)
 
     return _state

@@ -39,9 +39,8 @@ def comp_terms(left_l: Union[int, list], right_l: Union[int, list]) -> int:
     if isinstance(left_l, int):
         if isinstance(right_l, list):
             return comp_terms([left_l], right_l)
-        else:
-            return left_l - right_l
-    elif isinstance(right_l, int):
+        return left_l - right_l
+    if isinstance(right_l, int):
         return comp_terms(left_l, [right_l])
 
     for left_i, right_i in zip(left_l, right_l):

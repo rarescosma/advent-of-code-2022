@@ -111,7 +111,7 @@ fn advance(map: &Map<Tile>) -> Map<Tile> {
                     if np.y == map.size.y {
                         np.y = 0
                     }
-                    match new_map.get_unchecked_ref(np) {
+                    match new_map.get_unchecked_mut_ref(np) {
                         Tile::Blizz(nbs) => {
                             nbs.push(b);
                         }

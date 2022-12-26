@@ -1,0 +1,3 @@
+[submodule "aoc_prelude"]
+	path = aoc_prelude
+	url = https://github.com/rarescosma/advent-of-code-2021-rs

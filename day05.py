@@ -34,7 +34,7 @@ for line in move_lines:
     move(s2, int(syms[1]), int(syms[3]), int(syms[5]), 2)
 
 
-a1 = "".join((s[-1] if s else " ") for s in s1)
+a1: str = "".join((s[-1] if s else " ") for s in s1)
 print(a1)
-a2 = "".join((s[-1] if s else " ") for s in s2)
+a2: str = "".join((s[-1] if s else " ") for s in s2)
 print(a2)

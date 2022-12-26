@@ -19,21 +19,21 @@ test_data = dedent(
 ).splitlines()
 
 real_data = Path("inputs/25.txt").read_text().splitlines()
-real = True
+real: bool = True
 
 the_data = real_data if real else test_data
 
 snafu = {"0": 0, "1": 1, "2": 2, "-": -1, "=": -2}
 ufans = {v: k for k, v in snafu.items()}
 
-total = 0
+total: int = 0
 for number in the_data:
-    power = 1
+    power: int = 1
     for digit in number[::-1]:
         total += snafu[digit] * power
         power *= 5
 
-output = ""
+output: str = ""
 while total:
     total, rem = divmod(total, 5)
     output = ufans[((rem + 2) % 5) - 2] + output

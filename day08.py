@@ -19,6 +19,9 @@ test_data = dedent(
 )
 
 real_data = Path("inputs/08.txt").read_text()
+real: bool = True
+
+the_data = real_data if real else test_data
 
 
 class Pos(NamedTuple):
@@ -52,21 +55,21 @@ class Map:
 
         part = cls(lines, {}, {}, Size(max_x, max_y))
 
-        for (x, y) in part.iter():
-            el = part.get(x, y)
-            row_map[el][y].append(x)
-            col_map[el][x].append(y)
+        for (_x, _y) in part.iter():
+            tile = part.get(_x, _y)
+            row_map[tile][_y].append(_x)
+            col_map[tile][_x].append(_y)
 
         return replace(part, row_map=row_map, col_map=col_map)
 
-    def get(self, x: int, y: int) -> int:
-        return int(self.lines[y][x])
+    def get(self, _x: int, _y: int) -> int:
+        return int(self.lines[_y][_x])
 
-    def stats(self, x: int, y: int) -> TreeStats:
-        if x == 0 or y == 0 or x == self.size.x - 1 or y == self.size.y - 1:
+    def stats(self, _x: int, _y: int) -> TreeStats:
+        if _x == 0 or _y == 0 or _x == self.size.x - 1 or _y == self.size.y - 1:
             return TreeStats(True, 0)
 
-        height = self.get(x, y)
+        height = self.get(_x, _y)
         vis_w, vis_e, vis_n, vis_s = True, True, True, True
         box_w, box_e, box_n, box_s = (
             0,
@@ -76,40 +79,40 @@ class Map:
         )
 
         for target_height in range(height, MAX_HEIGHT + 1):
-            if rows := self.row_map[target_height][y]:
-                if rows[0] < x:
+            if rows := self.row_map[target_height][_y]:
+                if rows[0] < _x:
                     # there is (at least) one westerly tree of `target_height`
                     # => block western visibility + update bounding box
                     # (to the eastmost westerly tree (of `target_height`))
                     vis_w = False
-                    box_w = max(box_w, rows[bisect.bisect_left(rows, x) - 1])
-                if rows[-1] > x:
+                    box_w = max(box_w, rows[bisect.bisect_left(rows, _x) - 1])
+                if rows[-1] > _x:
                     vis_e = False
-                    box_e = min(box_e, rows[bisect.bisect_right(rows, x)])
-            if cols := self.col_map[target_height][x]:
-                if cols[0] < y:
+                    box_e = min(box_e, rows[bisect.bisect_right(rows, _x)])
+            if cols := self.col_map[target_height][_x]:
+                if cols[0] < _y:
                     vis_n = False
-                    box_n = max(box_n, cols[bisect.bisect_left(cols, y) - 1])
-                if cols[-1] > y:
+                    box_n = max(box_n, cols[bisect.bisect_left(cols, _y) - 1])
+                if cols[-1] > _y:
                     vis_s = False
-                    box_s = min(box_s, cols[bisect.bisect_right(cols, y)])
+                    box_s = min(box_s, cols[bisect.bisect_right(cols, _y)])
 
         return TreeStats(
             vis_w or vis_e or vis_n or vis_s,
-            (x - box_w) * (box_e - x) * (y - box_n) * (box_s - y),
+            (_x - box_w) * (box_e - _x) * (_y - box_n) * (box_s - _y),
         )
 
     def iter(self) -> Generator[Pos, None, None]:
-        for y in range(self.size.y):
-            for x in range(self.size.x):
-                yield Pos(x, y)
+        for _y in range(self.size.y):
+            for _x in range(self.size.x):
+                yield Pos(_x, _y)
 
 
 def default_map() -> HeightMap:
     return {x: defaultdict(list) for x in range(MAX_HEIGHT + 1)}
 
 
-the_map = Map.from_lines((real_data * 1).splitlines())
+the_map = Map.from_lines((the_data * 1).splitlines())
 stats = [the_map.stats(*pos) for pos in the_map.iter()]
 
 # Part 1 - visible trees

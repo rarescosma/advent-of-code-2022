@@ -17,6 +17,9 @@ R 2
 )
 
 real_data = Path("inputs/09.txt").read_text()
+real: bool = True
+
+the_data = real_data if real else test_data
 
 
 class Pos(NamedTuple):
@@ -27,15 +30,15 @@ class Pos(NamedTuple):
         return abs(self.x - other.x) <= 1 and abs(self.y - other.y) <= 1
 
     def step_towards(self, other: "Pos") -> "Pos":
-        dx = self._towards(self.x, other.x)
-        dy = self._towards(self.y, other.y)
-        return Pos(dx, dy)
+        _dx = self._towards(self.x, other.x)
+        _dy = self._towards(self.y, other.y)
+        return Pos(_dx, _dy)
 
     @staticmethod
-    def _towards(a: int, b: int) -> int:
-        if a == b:
+    def _towards(from_a: int, to_b: int) -> int:
+        if from_a == to_b:
             return 0
-        return 1 if b > a else -1
+        return 1 if to_b > from_a else -1
 
     def __add__(self, other: Union[tuple, "Pos"]) -> "Pos":
         if isinstance(other, Pos):
@@ -71,7 +74,7 @@ rope = [Node(head_pos)] * 10
 seen_p1 = {head_pos}
 seen_p2 = {head_pos}
 
-for instr in real_data.splitlines():
+for instr in the_data.splitlines():
     parts = instr.split(" ")
     (direction, steps) = parts[0], parts[1]
 

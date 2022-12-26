@@ -1,7 +1,6 @@
 # he without sin cast the first stone
 [MESSAGES CONTROL]
 disable=
-    invalid-name,
     too-few-public-methods,
     too-many-return-statements,
     missing-module-docstring,

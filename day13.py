@@ -4,8 +4,6 @@ from pathlib import Path
 from textwrap import dedent
 from typing import Union
 
-real_data = Path("inputs/13.txt").read_text()
-
 test_data = dedent(
     """
 [1,1,3,1,1]
@@ -34,6 +32,11 @@ test_data = dedent(
 """.strip()
 )
 
+real_data = Path("inputs/13.txt").read_text()
+real: bool = True
+
+the_data = real_data if real else test_data
+
 
 def comp_terms(left_l: Union[int, list], right_l: Union[int, list]) -> int:
     if isinstance(left_l, int):
@@ -50,9 +53,9 @@ def comp_terms(left_l: Union[int, list], right_l: Union[int, list]) -> int:
 
 
 # Part 1
-p1 = 0
+p1: int = 0
 packets = []
-for _i, pairs in enumerate(real_data.split("\n\n")):
+for _i, pairs in enumerate(the_data.split("\n\n")):
     parts = pairs.splitlines()
     left_term, right_term = map(eval, parts)
     packets.extend([left_term, right_term])

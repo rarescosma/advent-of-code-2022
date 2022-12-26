@@ -15,6 +15,9 @@ test_data = dedent(
 4
 """.strip()
 ).splitlines()
+real: bool = True
+
+the_data = real_data if real else test_data
 
 
 @dataclass
@@ -41,36 +44,36 @@ def intercede(_el: El, bef: Ptr, aft: Ptr) -> None:
     _el.left = bef
 
 
-def mix_it(the_data: list[str], coef: int = 1, times: int = 1) -> El:
-    dll = [El(int(_) * coef) for _ in the_data]
-    zero = dll[the_data.index("0")]
+def mix_it(_the_data: list[str], coef: int = 1, times: int = 1) -> El:
+    dll = [El(int(_) * coef) for _ in _the_data]
+    zero = dll[_the_data.index("0")]
 
     # link the doubly linked list
-    for i, el in enumerate(dll):
-        el.left = dll[(i - 1) % len(dll)]
-        el.right = dll[(i + 1) % len(dll)]
+    for i, node in enumerate(dll):
+        node.left = dll[(i - 1) % len(dll)]
+        node.right = dll[(i + 1) % len(dll)]
 
     modulus = len(dll) - 1
     for _ in range(times):
-        for el in dll:
-            if el.k > 0:
-                dest = el
-                for _ in range(el.k % modulus):
+        for node in dll:
+            if node.k > 0:
+                dest = node
+                for _ in range(node.k % modulus):
                     dest = cast(El, dest.right)
                 n_dest = dest.right
-                intercede(el, dest, n_dest)
-            elif el.k < 0:
-                dest = el
-                for _ in range(-el.k % modulus):
+                intercede(node, dest, n_dest)
+            elif node.k < 0:
+                dest = node
+                for _ in range(-node.k % modulus):
                     dest = cast(El, dest.left)
                 n_dest = dest.left
-                intercede(el, n_dest, dest)
+                intercede(node, n_dest, dest)
     return cast(El, zero)
 
 
 def solve(offset: int, times: int) -> int:
     _ans = 0
-    _zero = mix_it(real_data, offset, times)
+    _zero = mix_it(the_data, offset, times)
     _el = _zero
     for _ in range(3):
         for __ in range(1000):

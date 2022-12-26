@@ -43,12 +43,15 @@ Monkey 3:
 )
 
 real_data = Path("inputs/11.txt").read_text()
+real: bool = True
+
+the_data = real_data if real else test_data
 
 
 @dataclass
 class Monkey:
     items: deque[int]
-    op: Callable[[int], int]
+    operation: Callable[[int], int]
     div: int
     true_index: int
     false_index: int
@@ -63,7 +66,7 @@ class Monkey:
 
         return cls(
             items=deque(get_ints(lines[1])),
-            op=lambda x: _op(x, x if term == "old" else int(term)),
+            operation=lambda x: _op(x, x if term == "old" else int(term)),
             div=first_int(lines[3]),
             true_index=first_int(lines[4]),
             false_index=first_int(lines[5]),
@@ -78,7 +81,7 @@ class Monkey:
     ) -> None:
         while self.items:
             self.inspections += 1
-            _item = self.op(self.items.popleft())
+            _item = self.operation(self.items.popleft())
             if dampen:
                 _item = _item // 3
             if self.div_c:
@@ -113,7 +116,7 @@ def simulate_monkeys(
     return sorted([_.inspections for _ in monkeys], reverse=True)
 
 
-_lines = real_data.splitlines()
+_lines = the_data.splitlines()
 _monkeys = [
     Monkey.from_lines(_lines[offset : offset + 6])
     for offset in range(0, len(_lines), 7)

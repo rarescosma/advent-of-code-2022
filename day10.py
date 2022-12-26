@@ -6,7 +6,7 @@ from typing import Optional
 
 @dataclass
 class State:
-    x: int
+    x_pos: int
     pos: int
 
 
@@ -16,17 +16,17 @@ class Instr:
     code: str
 
     @classmethod
-    def from_str(cls, x: str) -> "Instr":
-        if x.startswith("addx"):
-            return Instr(2, x)
-        return Instr(1, x)
+    def from_str(cls, _x: str) -> "Instr":
+        if _x.startswith("addx"):
+            return cls(2, _x)
+        return cls(1, _x)
 
     def execute(self, state: State) -> None:
         if self.code == "noop":
             return
         if self.code.startswith("addx"):
             operands = self.code.split(" ")
-            state.x += int(operands[1])
+            state.x_pos += int(operands[1])
 
 
 @dataclass
@@ -49,25 +49,25 @@ class CPU:
             self.cur_instr = None
 
 
-_state = State(x=1, pos=0)
+_state = State(x_pos=1, pos=0)
 test_data = Path("inputs/10.txt").read_text()
 
 
-def interesting_cycle(x: int) -> bool:
-    return x > 0 and ((x - 20) % 40 == 0)
+def interesting_cycle(_x: int) -> bool:
+    return _x > 0 and ((_x - 20) % 40 == 0)
 
 
 def is_lit(state: State) -> bool:
-    return state.pos in (state.x, state.x - 1, state.x + 1)
+    return state.pos in (state.x_pos, state.x_pos - 1, state.x_pos + 1)
 
 
 cpu = CPU(instructions=deque(map(Instr.from_str, test_data.splitlines())))
-sig_sum = 0
-display = ""
+sig_sum: int = 0
+display: str = ""
 
 for cycle in range(1, 241):
     if interesting_cycle(cycle):
-        sig_sum += cycle * _state.x
+        sig_sum += cycle * _state.x_pos
 
     if _state.pos == 0:
         display += "\n"

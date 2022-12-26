@@ -259,7 +259,7 @@ def find_cube(named: set[Point], folds: list[Fold]) -> Adjacency:
             if num_points == 8:
                 _collate = defaultdict(set)
                 _adj: dict[PointId, set[PointId]] = defaultdict(set)
-                for _ in sorted(_named):
+                for _ in _named:
                     _collate[(_.x_coord, _.y_coord, _.z_coord)].add(_.pid)
                 for vertices in _collate.values():
                     for vertex in vertices:
@@ -373,7 +373,7 @@ class Geometry:
 
     @classmethod
     def from_vertices(cls, vertices: set[Point]) -> "Geometry":
-        vertices = {replace(_, pid=next(ID_GEN)) for _ in sorted(vertices)}
+        vertices = {replace(_, pid=next(ID_GEN)) for _ in vertices}
 
         squares = [
             [p0, p1, p2, p3]
@@ -395,7 +395,7 @@ class Geometry:
         common = {
             (_[0], _[1])
             for (sq0, sq1) in itertools.combinations(squares, r=2)
-            if len(_ := sorted(set(sq0) & set(sq1), key=lambda p: p.pid)) == 2
+            if len(_ := list(set(sq0) & set(sq1))) == 2
         }
 
         contour = {
@@ -405,9 +405,7 @@ class Geometry:
         }
         ring = make_ring(contour)
 
-        folds = [
-            Fold.from_ring(ring, _[0].pid, _[1].pid) for _ in sorted(common)
-        ]
+        folds = [Fold.from_ring(ring, _[0].pid, _[1].pid) for _ in common]
         cube_adj = find_cube(vertices, folds)
 
         return cls(vertices, contour, ring, cube_adj)
@@ -422,12 +420,10 @@ class Map:
     col_spans: list[Span]
 
     def get_portals(self) -> list[Portal]:
-        vertex_rows = sorted(
-            [
-                *range(0, self.max_y, FACE_SIZE),
-                *range(self.max_y - 1, 0, -FACE_SIZE),
-            ]
-        )
+        vertex_rows = [
+            *range(0, self.max_y, FACE_SIZE),
+            *range(self.max_y - 1, 0, -FACE_SIZE),
+        ]
         vxs = set()
         for _y in vertex_rows:
             x_start, x_end = self.row_spans[_y]
@@ -440,8 +436,8 @@ class Map:
 
         return [
             portal
-            for _ in sorted(geo.contour)
-            if (portal := Portal.from_edge(_, self, geo)) is not None
+            for edge in geo.contour
+            if (portal := Portal.from_edge(edge, self, geo)) is not None
         ]
 
 

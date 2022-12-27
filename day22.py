@@ -416,21 +416,23 @@ def make_ring(contour: set[Edge]) -> dict[PointId, PointId]:
 
 
 def find_cube(named: set[Point], folds: list[Fold]) -> Adjacency:
-    for directions in itertools.product(*([[True, False]] * len(folds))):
+    for mask in range(0, 2 ** len(folds)):
         _named = deepcopy(named)
-        for fold, direction in zip(folds, directions):
-            _named = fold.fold(_named, direction)
-            num_points = len({_.nameless() for _ in _named})
-            if num_points != 8:  # not a cube, keep foldin'
-                continue
-            collapsed = defaultdict(set)
-            adj: Adjacency = defaultdict(set)
-            for point in _named:
-                collapsed[point.nameless()].add(point.pid)
-            for point_ids in collapsed.values():
-                for point_id in point_ids:
-                    adj[point_id] |= point_ids - {point_id}
-            return adj
+        for i, fold in enumerate(folds):
+            _named = fold.fold(_named, bool(mask & (1 << i)))
+
+        num_points = len({_.nameless() for _ in _named})
+        if num_points != 8:  # not a cube, keep foldin'
+            continue
+
+        collapsed = defaultdict(set)
+        adj: Adjacency = defaultdict(set)
+        for point in _named:
+            collapsed[point.nameless()].add(point.pid)
+        for point_ids in collapsed.values():
+            for point_id in point_ids:
+                adj[point_id] |= point_ids - {point_id}
+        return adj
     return {}
 
 

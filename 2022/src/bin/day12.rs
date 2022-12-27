@@ -2,7 +2,7 @@ use aoc_2dmap::prelude::*;
 use aoc_dijsktra::{Dijsktra, GameState, Transform};
 use aoc_prelude::*;
 
-#[derive(PartialOrd, Ord, PartialEq, Eq, Hash, Clone)]
+#[derive(PartialOrd, Ord, PartialEq, Eq, Hash)]
 struct State {
     pos: Pos,
 }

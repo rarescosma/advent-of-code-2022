@@ -6,10 +6,16 @@ use std::fs;
 use std::hash::{Hash, Hasher};
 use std::iter::once;
 
-#[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Debug)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
 enum Tile {
     Empty,
     Blizz(ArrayVec<u8, 4>),
+}
+
+impl Default for Tile {
+    fn default() -> Self {
+        Self::Empty
+    }
 }
 
 impl From<u8> for Tile {
@@ -74,7 +80,7 @@ impl GameState<Ctx<'_>> for State {
         }
 
         for n_pos in self.pos.neighbors_simple().chain(once(current_pos)) {
-            match next_map.get(n_pos) {
+            match next_map.get_ref(n_pos) {
                 // end_pos is on a "wall", so off map but still valid
                 None if n_pos == ctx.end_pos => steps.push(Move(n_pos)),
                 Some(Tile::Empty) => steps.push(Move(n_pos)),
@@ -87,9 +93,9 @@ impl GameState<Ctx<'_>> for State {
 }
 
 fn advance(map: &Map<Tile>) -> Map<Tile> {
-    let mut new_map = Map::fill(map.size, Tile::Empty);
+    let mut new_map = Map::fill_default(map.size);
     for pos in map.iter() {
-        match map.get_unchecked(pos) {
+        match map.get_unchecked_ref(pos) {
             Tile::Blizz(bs) => {
                 for b in bs {
                     let mut np = match b {
@@ -113,9 +119,9 @@ fn advance(map: &Map<Tile>) -> Map<Tile> {
                     }
                     match new_map.get_unchecked_mut_ref(np) {
                         Tile::Blizz(nbs) => {
-                            nbs.push(b);
+                            nbs.push(*b);
                         }
-                        _ => new_map.set(np, Tile::Blizz(ArrayVec::from_iter(once(b)))),
+                        _ => new_map.set(np, Tile::Blizz(ArrayVec::from_iter(once(*b)))),
                     }
                 }
             }

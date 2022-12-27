@@ -162,11 +162,11 @@ class Map:
 
     @cached_property
     def row_spans(self) -> list[Span]:
-        return self.spans(1)
+        return self.spans(Y)
 
     @cached_property
     def col_spans(self) -> list[Span]:
-        return self.spans(0)
+        return self.spans(X)
 
     @cached_property
     def portals(self) -> list["Portal"]:

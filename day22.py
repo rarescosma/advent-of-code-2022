@@ -32,12 +32,12 @@ real_data = Path("inputs/22.txt").read_text().splitlines()
 real: bool = True
 
 if real:
-    the_data = [_ for _ in real_data[:-2] if _]
-    the_walk = real_data[-1]
+    map_lines = [_ for _ in real_data[:-2] if _]
+    walk_line = real_data[-1]
     FACE_SIZE = 50
 else:
-    the_data = [_ for _ in test_data[:-2] if _]
-    the_walk = test_data[-1]
+    map_lines = [_ for _ in test_data[:-2] if _]
+    walk_line = test_data[-1]
     FACE_SIZE = 4
 
 
@@ -342,12 +342,12 @@ class Portal:
         return Pos.from_point(new_pt), self.dest_dir
 
 
-def parse_map(_the_data: list[str]) -> Map:
+def parse_map(from_lines: list[str]) -> Map:
     grid = {}
-    max_y = len(_the_data)
-    max_x = max(len(_) for _ in _the_data)
+    max_y = len(from_lines)
+    max_x = max(len(_) for _ in from_lines)
     for _y in range(max_y):
-        row = _the_data[_y]
+        row = from_lines[_y]
         for _x, tile in enumerate(row):
             grid[Pos(_x, _y)] = " .#".index(tile)
         for _x in range(len(row), max_x):
@@ -355,9 +355,9 @@ def parse_map(_the_data: list[str]) -> Map:
     return Map(grid, MapSize(max_x, max_y))
 
 
-def parse_walk(_wline: str) -> list[Instr]:
-    spans = {_.span(): int(_.group(0)) for _ in INT_RE.finditer(_wline)} | {
-        _.span(): _.group(0) for _ in DIR_RE.finditer(_wline)
+def parse_walk(from_line: str) -> list[Instr]:
+    spans = {_.span(): int(_.group(0)) for _ in INT_RE.finditer(from_line)} | {
+        _.span(): _.group(0) for _ in DIR_RE.finditer(from_line)
     }
     return [spans[k] for k in sorted(spans)]
 
@@ -437,9 +437,9 @@ def find_cube(named: set[Point], folds: list[Fold]) -> Adjacency:
 
 
 # Part 1
-def part_one(m_map: Map, m_walk: list[Instr]) -> int:
-    cur_pos, facing = Pos(m_map.row_spans[0][0], 0), RIGHT
-    for instr in m_walk:
+def part_one(the_map: Map, the_walk: list[Instr]) -> int:
+    cur_pos, facing = Pos(the_map.row_spans[0][0], 0), RIGHT
+    for instr in the_walk:
         if isinstance(instr, str):
             # change orientation - right is clockwise
             facing = (facing + (1 if instr == "R" else -1)) % 4
@@ -447,7 +447,7 @@ def part_one(m_map: Map, m_walk: list[Instr]) -> int:
             # attempt walking
             walked = 0
             while walked < instr:
-                new_pos = wrapping_move(cur_pos, m_map, DELTAS[facing])
+                new_pos = wrapping_move(cur_pos, the_map, DELTAS[facing])
                 if new_pos is None:
                     break
                 cur_pos = new_pos
@@ -456,9 +456,9 @@ def part_one(m_map: Map, m_walk: list[Instr]) -> int:
 
 
 # Part 2
-def part_two(m_map: Map, m_walk: list[Instr]) -> int:
-    cur_pos, facing = Pos(m_map.row_spans[0][0], 0), RIGHT
-    for instr in m_walk:
+def part_two(the_map: Map, the_walk: list[Instr]) -> int:
+    cur_pos, facing = Pos(the_map.row_spans[0][0], 0), RIGHT
+    for instr in the_walk:
         if isinstance(instr, str):
             # change orientation - right is clockwise
             facing = (facing + (1 if instr == "R" else -1)) % 4
@@ -469,11 +469,11 @@ def part_two(m_map: Map, m_walk: list[Instr]) -> int:
                 new_pos = cur_pos + DELTAS[facing]
                 old_facing = facing
                 # teleport no matter what
-                for portal in m_map.portals:
-                    if portal.passes_thru(m_map, cur_pos, new_pos):
+                for portal in the_map.portals:
+                    if portal.passes_thru(the_map, cur_pos, new_pos):
                         new_pos, facing = portal.teleport(cur_pos)
                         break
-                if m_map.grid[new_pos] == WALL:
+                if the_map.grid[new_pos] == WALL:
                     facing = old_facing
                     break
                 cur_pos = new_pos
@@ -481,6 +481,6 @@ def part_two(m_map: Map, m_walk: list[Instr]) -> int:
     return 1000 * (cur_pos.y + 1) + 4 * (cur_pos.x + 1) + facing
 
 
-_map, instructions = parse_map(the_data), parse_walk(the_walk)
-print(part_one(_map, instructions))
-print(part_two(_map, instructions))
+my_map, my_walk = parse_map(map_lines), parse_walk(walk_line)
+print(part_one(my_map, my_walk))
+print(part_two(my_map, my_walk))

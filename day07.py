@@ -65,9 +65,10 @@ def next_command(lines: list[str]) -> Generator[Command, None, None]:
     yield last_cmd
 
 
+the_data = Path("inputs/07.txt").read_text().splitlines()
 
 state = State(PurePath("/"), defaultdict(int))
-for cmd in next_command(Path("inputs/07.txt").read_text().splitlines()):
+for cmd in next_command(the_data):
     state = state.update_state(cmd)
 
 # Part 1

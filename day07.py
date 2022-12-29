@@ -10,6 +10,9 @@ class Command:
     args: list[str]
     output: list[str]
 
+    def add_output_line(self, line: str) -> "Command":
+        return replace(self, output=[*self.output, line])
+
 
 @dataclass(frozen=True)
 class State:
@@ -52,7 +55,7 @@ def next_command(lines: list[str]) -> Generator[Command, None, None]:
             _cmd, *args = line.split(" ")[1:]  # throw the $ away
             last_cmd = Command(_cmd, args, [])
         else:
-            last_cmd = replace(last_cmd, output=[*last_cmd.output, line])
+            last_cmd = last_cmd.add_output_line(line)
 
     yield last_cmd
 

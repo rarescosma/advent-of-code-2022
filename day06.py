@@ -5,8 +5,7 @@ real_data = Path("inputs/06.txt").read_text()
 
 def distinct_index(_input: str, how_many: int) -> int:
     for i in range(len(_input)):
-        window = _input[i : i + how_many]
-        if len(window) == len(set(window)):
+        if len(set(_input[i : i + how_many])) == how_many:
             return i + how_many
     return -1
 

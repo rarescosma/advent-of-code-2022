@@ -49,10 +49,7 @@ def next_command(lines: list[str]) -> Generator[Command, None, None]:
             if last_cmd.cmd:
                 yield last_cmd
 
-            parts = line.split(" ")
-            parts.pop(0)  # throw the $ away
-
-            _cmd, *args = parts
+            _cmd, *args = line.split(" ")[1:]  # throw the $ away
             last_cmd = Command(_cmd, args, [])
         else:
             last_cmd = replace(last_cmd, output=[*last_cmd.output, line])

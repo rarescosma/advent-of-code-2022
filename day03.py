@@ -1,3 +1,5 @@
+from functools import reduce
+from operator import and_
 from pathlib import Path
 
 lines = Path("inputs/03.txt").read_text().splitlines()
@@ -23,10 +25,9 @@ p1 = sum(
 print(p1)
 
 # Part 2
-p2: int = 0
-for x in range(0, len(lines), 3):
-    l1 = to_prios(lines[x])
-    l2 = to_prios(lines[x + 1])
-    l3 = to_prios(lines[x + 2])
-    p2 += (l1 & l2 & l3).pop()
+sets = [to_prios(_) for _ in lines]
+p2 = sum(
+    reduce(and_, (sets[_] for _ in range(x, x + 3))).pop()
+    for x in range(0, len(sets), 3)
+)
 print(p2)

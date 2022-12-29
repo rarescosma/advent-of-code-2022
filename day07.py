@@ -19,13 +19,18 @@ class State:
     cur_dir: PurePath
     dirs: dict[str, int]
 
-    def go_up(self) -> "State":
-        return replace(self, cur_dir=self.cur_dir.parent)
+    def update_state(self, from_cmd: Command) -> "State":
+        if from_cmd.cmd == "cd":
+            return self.chdir(from_cmd.args[0])
+        if from_cmd.cmd == "ls":
+            return self.update_sizes(from_cmd.output)
+        return self
 
     def chdir(self, child: str) -> "State":
         if child == "/":
             return replace(self, cur_dir=PurePath("/"))
-
+        if child == "..":
+            return replace(self, cur_dir=self.cur_dir.parent)
         return replace(self, cur_dir=(self.cur_dir / child))
 
     def update_sizes(self, ls_output: list[str]) -> "State":
@@ -60,20 +65,10 @@ def next_command(lines: list[str]) -> Generator[Command, None, None]:
     yield last_cmd
 
 
-def update_state(_state: State, _cmd: Command) -> State:
-    if _cmd.cmd == "cd":
-        if _cmd.args[0] == "..":
-            return _state.go_up()
-        return _state.chdir(_cmd.args[0])
-    if _cmd.cmd == "ls":
-        return _state.update_sizes(_cmd.output)
-
-    return _state
-
 
 state = State(PurePath("/"), defaultdict(int))
 for cmd in next_command(Path("inputs/07.txt").read_text().splitlines()):
-    state = update_state(state, cmd)
+    state = state.update_state(cmd)
 
 # Part 1
 a1: int = 0

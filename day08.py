@@ -50,26 +50,25 @@ class Map:
         max_x = len(lines[0])
 
         # row by y, col by x
-        row_map = default_map()
-        col_map = default_map()
+        row_map, col_map = default_map(), default_map()
 
         part = cls(lines, {}, {}, Size(max_x, max_y))
 
-        for (_x, _y) in part.iter():
-            tile = part.get(_x, _y)
-            row_map[tile][_y].append(_x)
-            col_map[tile][_x].append(_y)
+        for pos in part.iter():
+            tile = part[pos]
+            row_map[tile][pos.y].append(pos.x)
+            col_map[tile][pos.x].append(pos.y)
 
         return replace(part, row_map=row_map, col_map=col_map)
 
-    def get(self, _x: int, _y: int) -> int:
-        return int(self.lines[_y][_x])
+    def __getitem__(self, pos: Pos) -> int:
+        return int(self.lines[pos.y][pos.x])
 
-    def stats(self, _x: int, _y: int) -> TreeStats:
-        if _x == 0 or _y == 0 or _x == self.size.x - 1 or _y == self.size.y - 1:
+    def stats(self, pos: Pos) -> TreeStats:
+        if pos == Pos(0,0) or pos == Pos(self.size.x - 1, self.size.y - 1):
             return TreeStats(True, 0)
+        _x, _y = pos
 
-        height = self.get(_x, _y)
         vis_w, vis_e, vis_n, vis_s = True, True, True, True
         box_w, box_e, box_n, box_s = (
             0,
@@ -78,7 +77,7 @@ class Map:
             self.size.y - 1,
         )
 
-        for target_height in range(height, MAX_HEIGHT + 1):
+        for target_height in range(self[pos], MAX_HEIGHT + 1):
             if rows := self.row_map[target_height][_y]:
                 if rows[0] < _x:
                     # there is (at least) one westerly tree of `target_height`
@@ -109,11 +108,11 @@ class Map:
 
 
 def default_map() -> HeightMap:
-    return {x: defaultdict(list) for x in range(MAX_HEIGHT + 1)}
+    return {_: defaultdict(list) for _ in range(MAX_HEIGHT + 1)}
 
 
 the_map = Map.from_lines((the_data * 1).splitlines())
-stats = [the_map.stats(*pos) for pos in the_map.iter()]
+stats = [the_map.stats(pos) for pos in the_map.iter()]
 
 # Part 1 - visible trees
 a1 = len([1 for _ in stats if _.visible])

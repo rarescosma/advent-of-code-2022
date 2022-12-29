@@ -35,11 +35,13 @@ class State:
 
     def update_sizes(self, ls_output: list[str]) -> "State":
         new_dirs = self.dirs
-        for out in ls_output:
-            out_parts = out.split(" ")
-            if out_parts and out_parts[0].isdigit():
-                for asc in self.get_ascendants(self.cur_dir):
-                    new_dirs[asc] += int(out_parts[0])
+        f_sizes = sum(
+            int(first)
+            for line in ls_output
+            if (first := line.split(" ")[0]).isnumeric()
+        )
+        for asc in self.get_ascendants(self.cur_dir):
+            new_dirs[asc] += int(f_sizes)
         return replace(self, dirs=new_dirs)
 
     @staticmethod

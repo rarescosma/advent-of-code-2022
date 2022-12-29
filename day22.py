@@ -174,13 +174,15 @@ class Map:
             *range(0, self.size.y, FACE_SIZE),
             *range(self.size.y - 1, 0, -FACE_SIZE),
         ]
-        vertices = set()
+
+        # ofsset all vertices to avoid boundary madness
+        offset, vertices = Point(-0.5, -0.5, -0.5), set()
         for _y in vertex_rows:
             x_start, x_end = self.row_spans[_y]
             if _y % FACE_SIZE != 0:
                 _y += 1
             for _x in range(x_start, x_end + 1, FACE_SIZE):
-                vertices.add(Point(_x - 0.5, _y - 0.5, -0.5))
+                vertices.add(Point(_x, _y) + offset)
 
         geo = Geometry.from_vertices(vertices)
 

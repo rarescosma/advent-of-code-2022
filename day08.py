@@ -65,7 +65,7 @@ class Map:
         return int(self.lines[pos.y][pos.x])
 
     def stats(self, pos: Pos) -> TreeStats:
-        if pos == Pos(0,0) or pos == Pos(self.size.x - 1, self.size.y - 1):
+        if pos == Pos(0, 0) or pos == Pos(self.size.x - 1, self.size.y - 1):
             return TreeStats(True, 0)
         _x, _y = pos
 

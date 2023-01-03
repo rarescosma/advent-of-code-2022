@@ -182,12 +182,12 @@ class Map:
             for _x in range(x_start, x_end + 1, FACE_SIZE):
                 vertices.add(Point(_x, _y) + offset)
 
-        geo = Geometry.from_vertices(vertices)
+        geo = Geometry.new(vertices)
 
         return [
             portal
             for edge in geo.contour
-            if (portal := Portal.from_edge(edge, self, geo)) is not None
+            if (portal := Portal.try_new(edge, self, geo)) is not None
         ]
 
 
@@ -199,7 +199,7 @@ class Geometry:
     cube_adj: Adjacency
 
     @classmethod
-    def from_vertices(cls, vertices: set[Point]) -> "Geometry":
+    def new(cls, vertices: set[Point]) -> "Geometry":
         # give each vertex a unique ID to track them across folds
         vertices = {replace(_, pid=next(ID_GEN)) for _ in vertices}
 
@@ -224,7 +224,7 @@ class Geometry:
         }
         ring = make_ring(contour)
 
-        folds = [Fold.from_ring(ring, (_[0].pid, _[1].pid)) for _ in common]
+        folds = [Fold.new((_[0].pid, _[1].pid), ring) for _ in common]
         cube_adj = find_cube(vertices, folds)
 
         return cls(vertices, contour, ring, cube_adj)
@@ -236,7 +236,7 @@ class Fold:
     mobile_pids: set[PointId]
 
     @classmethod
-    def from_ring(cls, ring: dict[PointId, PointId], edge: Edge) -> "Fold":
+    def new(cls, edge: Edge, ring: dict[PointId, PointId]) -> "Fold":
         cur, end = edge
         mobile_pids = set()
         while ring[cur] != end:
@@ -266,7 +266,7 @@ class Portal:
     delta: Point
 
     @classmethod
-    def from_edge(
+    def try_new(
         cls, edge: Edge, the_map: Map, geo: Geometry
     ) -> Optional["Portal"]:
         s0_pid, s1_pid = edge

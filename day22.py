@@ -60,9 +60,8 @@ class Pos(NamedTuple):
             raise ValueError
         return Pos(self.x + other.x, self.y + other.y)
 
-    @classmethod
-    def from_point(cls, point: "Point") -> "Pos":
-        return Pos(int(point[X]), int(point[Y]))
+    def to_point(self) -> "Point":
+        return Point(self.x, self.y)
 
 
 DELTAS = [Pos(1, 0), Pos(0, 1), Pos(-1, 0), Pos(0, -1)]
@@ -90,9 +89,8 @@ class Point:
     _z: float = 0
     pid: PointId = -1
 
-    @classmethod
-    def from_pos(cls, pos: Pos) -> "Point":
-        return cls(pos.x, pos.y)
+    def to_pos(self) -> "Pos":
+        return Pos(int(self._x), int(self._y))
 
     def __add__(self, other: "Point") -> "Point":
         return Point(self._x + other._x, self._y + other._y, self._z + other._z)
@@ -290,18 +288,18 @@ class Portal:
 
         if dest_a[X] == dest_b[X]:
             dest_axis = X
-            probe = Pos.from_point(
-                Point(dest_a[X] - 0.5, (dest_a[Y] + dest_b[Y]) // 2)
-            )
+            probe = Point(
+                dest_a[X] - 0.5, (dest_a[Y] + dest_b[Y]) // 2
+            ).to_pos()
             if the_map.grid.get(probe, OUT) == OUT:
                 dest_dir, delta = RIGHT, Point(0.5, 0)
             else:
                 dest_dir, delta = LEFT, Point(-0.5, 0)
         else:
             dest_axis = Y
-            probe = Pos.from_point(
-                Point((dest_a[X] + dest_b[X]) // 2, dest_a[Y] - 0.5)
-            )
+            probe = Point(
+                (dest_a[X] + dest_b[X]) // 2, dest_a[Y] - 0.5
+            ).to_pos()
             if the_map.grid.get(probe, OUT) == OUT:
                 dest_dir, delta = DOWN, Point(0, 0.5)
             else:
@@ -320,7 +318,7 @@ class Portal:
 
     def passes_thru(self, the_map: "Map", old_pos: Pos, new_pos: Pos) -> bool:
         src_a, src_b = self.src
-        old_pt, new_pt = Point.from_pos(old_pos), Point.from_pos(new_pos)
+        old_pt, new_pt = old_pos.to_point(), new_pos.to_point()
 
         dim, conv = self.src_axis, converse(self.src_axis)
         if src_a[dim] == src_b[dim] and new_pt[dim] != old_pt[dim]:
@@ -333,7 +331,7 @@ class Portal:
 
     def teleport(self, old_pos: Pos) -> tuple[Pos, Direction]:
         # translate from src_a to dest_a
-        old_pt, offset_dim = Point.from_pos(old_pos), converse(self.src_axis)
+        old_pt, offset_dim = old_pos.to_point(), converse(self.src_axis)
         src_a, dest_a = self.src[0], self.dest[0]
         a_diff = old_pt[offset_dim] - src_a[offset_dim]
 
@@ -341,7 +339,7 @@ class Portal:
             converse(self.dest_axis),
             lambda c: c + self.signum * a_diff,
         )
-        return Pos.from_point(new_pt), self.dest_dir
+        return new_pt.to_pos(), self.dest_dir
 
 
 def parse_map(from_lines: list[str]) -> Map:

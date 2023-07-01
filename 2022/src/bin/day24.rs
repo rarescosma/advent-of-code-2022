@@ -1,10 +1,12 @@
+use std::{
+    env, fs,
+    hash::{Hash, Hasher},
+    iter::once,
+};
+
 use aoc_2dmap::prelude::*;
 use aoc_dijsktra::{Dijsktra, GameState, Transform};
 use aoc_prelude::*;
-use std::env;
-use std::fs;
-use std::hash::{Hash, Hasher};
-use std::iter::once;
 
 #[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
 enum Tile {

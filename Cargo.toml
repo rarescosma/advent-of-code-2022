@@ -17,6 +17,7 @@ num-iter = "0.1.43"
 num-traits = "0.2.15"
 pest = { version = "2.5.2", default-features = false }
 pest_derive = "2.5.2"
+rayon = "1.5"
 regex = { version = "1.7", default-features = false, features = ["std", "unicode-perl"] }
 
 [profile.release]

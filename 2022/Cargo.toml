@@ -13,10 +13,15 @@ deku.workspace = true
 pest.workspace = true
 pest_derive.workspace = true
 regex.workspace = true
+rayon.workspace = true
 
 [[bin]]
 name = "day12"
 path = "src/bin/day12.rs"
+
+[[bin]]
+name = "day19"
+path = "src/bin/day19.rs"
 
 [[bin]]
 name = "day24"

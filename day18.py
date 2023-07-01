@@ -108,5 +108,4 @@ cubes = {Cube(*[int(_) for _ in line.split(",")]) for line in the_data}
 print(6 * len(cubes) - 2 * len(common_faces(cubes, cubes)))
 
 # Part 2
-
 print(len(common_faces(cubes, dfs_fill(cubes))))

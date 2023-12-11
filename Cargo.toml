@@ -3,6 +3,7 @@ members = [
     "2022",
     "aoc_prelude/crates/*",
 ]
+resolver = "2"
 
 [workspace.dependencies]
 ahash = "0.8.2"

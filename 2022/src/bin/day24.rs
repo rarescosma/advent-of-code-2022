@@ -81,7 +81,7 @@ impl GameState<Ctx<'_>> for State {
             steps.push(Move(current_pos));
         }
 
-        for n_pos in self.pos.neighbors_simple().chain(once(current_pos)) {
+        for n_pos in self.pos.neighbors_simple_inclusive() {
             match next_map.get_ref(n_pos) {
                 // end_pos is on a "wall", so off map but still valid
                 None if n_pos == ctx.end_pos => steps.push(Move(n_pos)),
@@ -202,8 +202,8 @@ fn main() {
         map_stages.push(new_map);
     }
 
-    let start_pos: Pos = (0, -1).into();
-    let end_pos = Pos::from((map_size.0 - 1, map_size.1));
+    let start_pos = Pos::new(0, -1);
+    let end_pos = Pos::new(map_size.0 - 1, map_size.1);
 
     // Part 1 - there
     let ans = solve(start_pos, end_pos, &map_stages, 0);

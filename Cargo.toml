@@ -6,20 +6,20 @@ members = [
 resolver = "2"
 
 [workspace.dependencies]
-ahash = "0.8.2"
-arrayvec = "0.7.2"
-deku = "0.15.1"
-hashbrown = "0.13.1"
+ahash = "0.8.11"
+arrayvec = "0.7.4"
+deku = "0.16.0"
+hashbrown = "0.14.3"
 hex = "0.4.3"
-itertools = "0.10.5"
+itertools = "0.12.1"
 lazy_static = "1.4.0"
-multimap = { version = "0.8.3", default-features = false }
-num-iter = "0.1.43"
-num-traits = "0.2.15"
-pest = { version = "2.5.2", default-features = false }
-pest_derive = "2.5.2"
-rayon = "1.5"
-regex = { version = "1.7", default-features = false, features = ["std", "unicode-perl"] }
+multimap = { version = "0.10.0", default-features = false }
+num-iter = "0.1.44"
+num-traits = "0.2.18"
+pest = { version = "2.7.9", default-features = false }
+pest_derive = "2.7.9"
+rayon = "1.10"
+regex = { version = "1.10", default-features = false, features = ["std", "unicode-perl"] }
 
 [profile.release]
 lto = "fat"
